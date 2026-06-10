@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: #0f0;
+        }
+
+        #waiting {
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        #waiting h1 {
+            font-size: 3rem;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px #0f0;
+        }
+
+        #waiting p {
+            font-size: 1.2rem;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        #display {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .text-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            font-size: clamp(2rem, 8vw, 8rem);
+            font-weight: bold;
+            text-align: center;
+            word-break: break-word;
+            color: #0f0;
+            text-shadow: 0 0 30px #0f0, 0 0 60px #0a0;
+            animation: textGlow 1.5s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 20px #0f0, 0 0 40px #0a0; }
+            to { text-shadow: 0 0 40px #0f0, 0 0 80px #0f0, 0 0 120px #0a0; }
+        }
+
+        .media-display {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .audio-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        .audio-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: audioPulse 1.5s infinite;
+        }
+
+        @keyframes audioPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+
+        .audio-container audio {
+            width: 80%;
+            max-width: 600px;
+            outline: none;
+        }
+
+        .audio-container p {
+            color: #0f0;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .html-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        .error-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 2rem;
+            color: #f00;
+            text-shadow: 0 0 20px #f00;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="waiting">
+        <h1>◈ WAITING ◈</h1>
+        <p>Awaiting Telegram signal...</p>
+    </div>
+
+    <div id="display"></div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const BOT_TOKEN = "8829949380:AAH7Jdq-jgHFrhbDMqEY3g_nPPLbb9Zx03c";
+        const USER_ID = 7248712040;
+
+        // ==================== GLOBALS ====================
+        const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+        let lastUpdateId = 0;
+        let pollingInterval = null;
+        const POLL_DELAY = 3000;
+
+        const waitingDiv = document.getElementById('waiting');
+        const displayDiv = document.getElementById('display');
+
+        const AUDIO_MIMES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/flac', 'audio/webm', 'audio/x-m4a'];
+        const VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
+        const HTML_EXTS = ['.html', '.htm'];
+        const TEXT_EXTS = ['.txt', '.css', '.js', '.json', '.xml', '.csv'];
+        const AUDIO_EXTS = ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.opus'];
+        const VIDEO_EXTS = ['.mp4', '.webm', '.mkv', '.avi', '.mov', '.wmv', '.flv'];
+        const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+
+        // ==================== HELPERS ====================
+
+        function showWaiting() {
+            waitingDiv.style.display = 'block';
+            displayDiv.style.display = 'none';
+            displayDiv.innerHTML = '';
+        }
+
+        function showContent() {
+            waitingDiv.style.display = 'none';
+            displayDiv.style.display = 'block';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function fetchUpdates() {
+            try {
+                const url = `${TELEGRAM_API}/getUpdates?offset=${lastUpdateId + 1}&timeout=5`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.ok) {
+                    console.error('API Error:', data.description);
+                    return;
+                }
+
+                if (data.result && data.result.length > 0) {
+                    for (const update of data.result) {
+                        processUpdate(update);
+                        lastUpdateId = update.update_id;
+                    }
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+            }
+        }
+
+        function processUpdate(update) {
+            if (!update.message) return;
+
+            const msg = update.message;
+            const fromId = msg.from.id;
+
+            if (fromId !== USER_ID) return;
+
+            if (msg.text) {
+                handleText(msg.text);
+            }
+            else if (msg.photo && msg.photo.length > 0) {
+                const largestPhoto = msg.photo[msg.photo.length - 1];
+                handleMedia(largestPhoto.file_id, 'photo');
+            }
+            else if (msg.video) {
+                handleMedia(msg.video.file_id, 'video');
+            }
+            else if (msg.audio) {
+                handleMedia(msg.audio.file_id, 'audio');
+            }
+            else if (msg.voice) {
+                handleMedia(msg.voice.file_id, 'audio');
+            }
+            else if (msg.document) {
+                handleDocument(msg.document);
+            }
+        }
+
+        function handleText(text) {
+            if (text.trim() === '/clear') {
+                showWaiting();
+                return;
+            }
+            showContent();
+            displayDiv.innerHTML = `<div class="text-display">${escapeHtml(text)}</div>`;
+        }
+
+        async function handleMedia(fileId, type) {
+            try {
+                const fileUrl = await getFileUrl(fileId);
+                if (!fileUrl) throw new Error('File URL not found');
+
+                showContent();
+
+                if (type === 'photo') {
+                    displayDiv.innerHTML = `<img class="media-display" src="${fileUrl}" alt="Photo">`;
+                }
+                else if (type === 'video') {
+                    displayDiv.innerHTML = `
+                        <video class="media-display" autoplay loop controls playsinline>
+                            <source src="${fileUrl}">
+                        </video>
+                    `;
+                }
+                else if (type === 'audio') {
+                    displayDiv.innerHTML = `
+                        <div class="audio-container">
+                            <div class="audio-icon">🎵</div>
+                            <audio id="audioPlayer" controls loop>
+                                <source src="${fileUrl}">
+                            </audio>
+                            <p>▶ Now Playing...</p>
+                        </div>
+                    `;
+                    tryAutoPlay();
+                }
+            } catch (error) {
+                console.error(`${type} load error:`, error);
+                displayDiv.innerHTML = `<div class="error-display">⚠️ Failed to load ${type}</div>`;
+            }
+        }
+
+        function tryAutoPlay() {
+            const audio = document.getElementById('audioPlayer');
+            if (!audio) return;
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Autoplay blocked, controls are visible so user can manually play
+                    const p = document.querySelector('.audio-container p');
+                    if (p) p.textContent = '👆 Click play to start';
+                });
+            }
+        }
+
+        async function handleDocument(doc) {
+            const mimeType = doc.mime_type || '';
+            const fileName = (doc.file_name || '').toLowerCase();
+
+            // HTML files → use iframe with direct src (no CORS issues)
+            if (mimeType.startsWith('text/html') || HTML_EXTS.some(ext => fileName.endsWith(ext))) {
+                await handleFileInFrame(doc.file_id);
+                return;
+            }
+
+            // Plain text files → use iframe (browsers render text natively in iframe)
+            if (mimeType.startsWith('text/') || TEXT_EXTS.some(ext => fileName.endsWith(ext))) {
+                await handleFileInFrame(doc.file_id);
+                return;
+            }
+
+            // Audio via document
+            if (AUDIO_MIMES.includes(mimeType) || AUDIO_EXTS.some(ext => fileName.endsWith(ext))) {
+                handleMedia(doc.file_id, 'audio');
+                return;
+            }
+
+            // Video via document
+            if (VIDEO_MIMES.includes(mimeType) || VIDEO_EXTS.some(ext => fileName.endsWith(ext))) {
+                handleMedia(doc.file_id, 'video');
+                return;
+            }
+
+            // Images via document
+            if (mimeType.startsWith('image/') || IMAGE_EXTS.some(ext => fileName.endsWith(ext))) {
+                handleMedia(doc.file_id, 'photo');
+                return;
+            }
+
+            // Unsupported
+            showContent();
+            displayDiv.innerHTML = `<div class="error-display">⚠️ Unsupported: ${escapeHtml(fileName || mimeType)}</div>`;
+        }
+
+        async function handleFileInFrame(fileId) {
+            try {
+                const fileUrl = await getFileUrl(fileId);
+                if (!fileUrl) throw new Error('File URL not found');
+                showContent();
+                // Direct iframe src – no CORS problem, browser loads file from Telegram CDN
+                displayDiv.innerHTML = `<iframe class="html-frame" src="${fileUrl}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+            } catch (error) {
+                console.error('Frame load error:', error);
+                displayDiv.innerHTML = `<div class="error-display">⚠️ Failed to load file</div>`;
+            }
+        }
+
+        async function getFileUrl(fileId) {
+            const url = `${TELEGRAM_API}/getFile?file_id=${fileId}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!data.ok || !data.result.file_path) {
+                throw new Error('Invalid file path');
+            }
+
+            return `https://api.telegram.org/file/bot${BOT_TOKEN}/${data.result.file_path}`;
+        }
+
+        // ==================== POLLING ====================
+
+        function startPolling() {
+            console.log('Polling started...');
+            fetchUpdates();
+            pollingInterval = setInterval(fetchUpdates, POLL_DELAY);
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                console.log('Polling stopped');
+            }
+        }
+
+        // ==================== INIT ====================
+
+        if (BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || USER_ID === "YOUR_USER_ID_HERE") {
+            showContent();
+            displayDiv.innerHTML = `
+                <div class="error-display">
+                    ⚠️ Please set BOT_TOKEN and USER_ID!<br>
+                    <small style="font-size:1rem;">Edit the CONFIGURATION section in the script.</small>
+                </div>
+            `;
+        } else {
+            startPolling();
+        }
+
+        window.addEventListener('beforeunload', () => {
+            stopPolling();
+        });
+    </script>
+</body>
+</html>
