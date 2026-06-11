@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Display</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⚡ NEX | Remote Display Control</title>
     <style>
+        :root {
+            --bg: #000000;
+            --text: #ffffff;
+            --glow: #ffffff;
+            --font: 'Courier New', 'Fira Code', 'Consolas', monospace;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,34 +21,130 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #000;
+            height: 100dvh;
+            background: var(--bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Courier New', monospace;
+            font-family: var(--font);
             overflow: hidden;
-            color: #0f0;
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0,0,0,0.1) 2px,
+                    rgba(0,0,0,0.1) 4px);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 998;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
         }
 
         #waiting {
+            position: relative;
+            z-index: 2;
             text-align: center;
-            animation: pulse 2s infinite;
+            animation: fadeIn 1s ease;
         }
 
-        #waiting h1 {
-            font-size: 3rem;
-            letter-spacing: 5px;
-            text-shadow: 0 0 20px #0f0;
+        #waiting .logo {
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 900;
+            letter-spacing: 12px;
+            color: #ffffff;
+            text-shadow: 0 0 40px #ffffff, 0 0 80px #ffffff;
+            animation: glitchFull 2.5s infinite;
+            position: relative;
+            display: inline-block;
         }
 
-        #waiting p {
-            font-size: 1.2rem;
+        @keyframes glitchFull {
+            0%, 90%, 100% {
+                transform: none;
+                text-shadow: 0 0 40px #fff, 0 0 80px #fff;
+            }
+            92% {
+                transform: translate(-3px, 2px) skewX(1deg);
+                text-shadow: -3px 0 #aaa, 3px 0 #777, 0 0 40px #fff;
+            }
+            94% {
+                transform: translate(3px, -1px) skewX(-1deg);
+                text-shadow: 3px 0 #999, -3px 0 #666, 0 0 80px #fff;
+            }
+            96% {
+                transform: translate(-2px, -2px);
+                text-shadow: -2px 2px #888, 2px -2px #555, 0 0 40px #fff;
+            }
+            98% {
+                transform: none;
+                text-shadow: 0 0 40px #fff, 0 0 80px #fff;
+            }
+        }
+
+        #waiting .tagline {
+            font-size: clamp(1rem, 3vw, 1.5rem);
             opacity: 0.7;
-            margin-top: 10px;
+            margin-top: 20px;
+            animation: pulse 2s infinite;
+            letter-spacing: 4px;
+            color: #ffffff;
+        }
+
+        #waiting .status-bar {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            opacity: 0.5;
+            color: #ffffff;
+        }
+
+        .blinking-dot {
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            box-shadow: 0 0 10px #ffffff;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
+            0%, 100% { opacity: 0.7; }
             50% { opacity: 0.3; }
         }
 
@@ -50,6 +153,8 @@
             width: 100%;
             height: 100%;
             position: relative;
+            z-index: 2;
+            animation: fadeIn 0.5s ease;
         }
 
         .text-display {
@@ -58,19 +163,70 @@
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 40px;
+            padding: 20px;
             font-size: clamp(2rem, 8vw, 8rem);
-            font-weight: bold;
+            font-weight: 900;
             text-align: center;
             word-break: break-word;
-            color: #0f0;
-            text-shadow: 0 0 30px #0f0, 0 0 60px #0a0;
-            animation: textGlow 1.5s infinite alternate;
+            color: #ffffff;
+            text-shadow: 0 0 30px #ffffff, 0 0 60px #ffffff;
+            animation: textGlow 2s infinite alternate;
+            letter-spacing: 2px;
         }
 
         @keyframes textGlow {
-            from { text-shadow: 0 0 20px #0f0, 0 0 40px #0a0; }
-            to { text-shadow: 0 0 40px #0f0, 0 0 80px #0f0, 0 0 120px #0a0; }
+            from { text-shadow: 0 0 20px #ffffff, 0 0 40px #ffffff; }
+            to { text-shadow: 0 0 40px #ffffff, 0 0 80px #ffffff, 0 0 120px #ffffff; }
+        }
+
+        .clock-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: clamp(3rem, 12vw, 10rem);
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 30px #fff, 0 0 60px #fff;
+            letter-spacing: 6px;
+        }
+
+        .alert-popup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            gap: 20px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .alert-popup .alert-box {
+            background: #111;
+            border: 2px solid #fff;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255,255,255,0.3), inset 0 0 30px rgba(255,255,255,0.05);
+        }
+
+        .alert-popup .alert-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .alert-popup .alert-message {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px #fff;
+            letter-spacing: 2px;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .media-display {
@@ -78,6 +234,7 @@
             height: 100%;
             object-fit: contain;
             background: #000;
+            filter: grayscale(100%);
         }
 
         .audio-container {
@@ -88,30 +245,58 @@
             width: 100%;
             height: 100%;
             background: #000;
+            gap: 20px;
         }
 
-        .audio-icon {
-            font-size: 8rem;
-            margin-bottom: 30px;
-            animation: audioPulse 1.5s infinite;
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 100px;
+            margin-bottom: 10px;
         }
 
-        @keyframes audioPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
+        .visualizer .bar {
+            width: 8px;
+            background: #ffffff;
+            border-radius: 4px;
+            animation: visualize 1s infinite alternate;
+            box-shadow: 0 0 10px #ffffff;
+        }
+
+        .visualizer .bar:nth-child(1) { height: 30px; animation-delay: 0s; }
+        .visualizer .bar:nth-child(2) { height: 60px; animation-delay: 0.1s; }
+        .visualizer .bar:nth-child(3) { height: 40px; animation-delay: 0.2s; }
+        .visualizer .bar:nth-child(4) { height: 80px; animation-delay: 0.3s; }
+        .visualizer .bar:nth-child(5) { height: 50px; animation-delay: 0.4s; }
+        .visualizer .bar:nth-child(6) { height: 70px; animation-delay: 0.5s; }
+        .visualizer .bar:nth-child(7) { height: 35px; animation-delay: 0.6s; }
+        .visualizer .bar:nth-child(8) { height: 65px; animation-delay: 0.7s; }
+        .visualizer .bar:nth-child(9) { height: 45px; animation-delay: 0.8s; }
+        .visualizer .bar:nth-child(10) { height: 75px; animation-delay: 0.9s; }
+        .visualizer .bar:nth-child(11) { height: 55px; animation-delay: 1s; }
+        .visualizer .bar:nth-child(12) { height: 90px; animation-delay: 1.1s; }
+
+        @keyframes visualize {
+            0% { transform: scaleY(0.4); opacity: 0.5; }
+            100% { transform: scaleY(1); opacity: 1; }
         }
 
         .audio-container audio {
-            width: 80%;
-            max-width: 600px;
+            width: 90%;
+            max-width: 500px;
             outline: none;
+            border-radius: 10px;
+            background: #111;
+            padding: 5px;
+            filter: grayscale(100%);
         }
 
-        .audio-container p {
-            color: #0f0;
-            margin-top: 20px;
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px #0f0;
+        .audio-container .audio-label {
+            color: #ffffff;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            text-shadow: 0 0 10px #ffffff;
+            letter-spacing: 2px;
         }
 
         .html-frame {
@@ -119,30 +304,75 @@
             height: 100%;
             border: none;
             background: #fff;
+            filter: grayscale(100%);
         }
 
         .error-display {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100%;
-            font-size: 2rem;
-            color: #f00;
-            text-shadow: 0 0 20px #f00;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            color: #ffffff;
+            text-shadow: 0 0 20px #ffffff;
             padding: 20px;
             text-align: center;
+            gap: 15px;
+        }
+
+        .error-display .icon {
+            font-size: 4rem;
+        }
+
+        .timestamp {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            z-index: 10;
+            font-size: 0.8rem;
+            opacity: 0.4;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .battery-indicator {
+            position: fixed;
+            bottom: 15px;
+            left: 20px;
+            z-index: 10;
+            font-size: 0.8rem;
+            opacity: 0.4;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .visualizer .bar { width: 5px; }
+            .visualizer { gap: 2px; height: 60px; }
+            .timestamp { bottom: 10px; right: 10px; font-size: 0.7rem; }
+            .battery-indicator { bottom: 10px; left: 10px; font-size: 0.7rem; }
         }
     </style>
 </head>
 <body>
 
+    <div id="flash-overlay"></div>
+
     <div id="waiting">
-        <h1>◈ WAITING ◈</h1>
-        <p>Awaiting Telegram signal...</p>
+        <div class="logo">NEX</div>
+        <p class="tagline">AWAITING SIGNAL...</p>
+        <div class="status-bar">
+            <span class="blinking-dot"></span>
+            <span>SECURE CHANNEL ACTIVE</span>
+        </div>
     </div>
 
     <div id="display"></div>
+
+    <div class="timestamp" id="timestamp"></div>
+    <div class="battery-indicator" id="battery"></div>
 
     <script>
         // ==================== CONFIGURATION ====================
@@ -152,31 +382,65 @@
         // ==================== GLOBALS ====================
         const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
         let lastUpdateId = 0;
+        let isFirstFetch = true;
         let pollingInterval = null;
         const POLL_DELAY = 3000;
+        let notificationSound = true;
+        let clockInterval = null;
 
         const waitingDiv = document.getElementById('waiting');
         const displayDiv = document.getElementById('display');
+        const timestampEl = document.getElementById('timestamp');
+        const batteryEl = document.getElementById('battery');
+        const flashOverlay = document.getElementById('flash-overlay');
 
         const AUDIO_MIMES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/flac', 'audio/webm', 'audio/x-m4a'];
         const VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
         const HTML_EXTS = ['.html', '.htm'];
-        const TEXT_EXTS = ['.txt', '.css', '.js', '.json', '.xml', '.csv'];
-        const AUDIO_EXTS = ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.opus'];
-        const VIDEO_EXTS = ['.mp4', '.webm', '.mkv', '.avi', '.mov', '.wmv', '.flv'];
-        const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+        const TEXT_EXTS = ['.txt', '.css', '.js', '.json', '.xml', '.csv', '.md'];
+        const AUDIO_EXTS = ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.opus', '.wma'];
+        const VIDEO_EXTS = ['.mp4', '.webm', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.3gp'];
+        const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico'];
+
+        // ==================== BATTERY ====================
+        async function updateBattery() {
+            try {
+                if ('getBattery' in navigator) {
+                    const battery = await navigator.getBattery();
+                    const level = Math.round(battery.level * 100);
+                    const charging = battery.charging ? ' ⚡' : '';
+                    batteryEl.textContent = `🔋 ${level}%${charging}`;
+                    battery.addEventListener('levelchange', updateBattery);
+                    battery.addEventListener('chargingchange', updateBattery);
+                }
+            } catch (e) {
+                batteryEl.textContent = '';
+            }
+        }
 
         // ==================== HELPERS ====================
 
+        function stopClock() {
+            if (clockInterval) {
+                clearInterval(clockInterval);
+                clockInterval = null;
+            }
+        }
+
         function showWaiting() {
+            stopClock();
             waitingDiv.style.display = 'block';
             displayDiv.style.display = 'none';
             displayDiv.innerHTML = '';
+            timestampEl.textContent = '';
         }
 
         function showContent() {
+            stopClock();
             waitingDiv.style.display = 'none';
             displayDiv.style.display = 'block';
+            const now = new Date();
+            timestampEl.textContent = now.toLocaleTimeString();
         }
 
         function escapeHtml(str) {
@@ -185,9 +449,40 @@
             return div.innerHTML;
         }
 
+        function flashScreen() {
+            flashOverlay.style.opacity = '1';
+            setTimeout(() => { flashOverlay.style.opacity = '0'; }, 150);
+        }
+
+        function playBeep() {
+            if (!notificationSound) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 800;
+                osc.type = 'square';
+                gain.gain.value = 0.05;
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {}
+        }
+
+        // ==================== TELEGRAM API ====================
+
         async function fetchUpdates() {
             try {
-                const url = `${TELEGRAM_API}/getUpdates?offset=${lastUpdateId + 1}&timeout=5`;
+                let url;
+                if (isFirstFetch) {
+                    // First fetch: get ALL unconfirmed updates, we'll only show the LAST one
+                    url = `${TELEGRAM_API}/getUpdates?timeout=10`;
+                    isFirstFetch = false;
+                } else {
+                    url = `${TELEGRAM_API}/getUpdates?offset=${lastUpdateId + 1}&timeout=5`;
+                }
+
                 const response = await fetch(url);
                 const data = await response.json();
 
@@ -197,9 +492,20 @@
                 }
 
                 if (data.result && data.result.length > 0) {
-                    for (const update of data.result) {
-                        processUpdate(update);
-                        lastUpdateId = update.update_id;
+                    // On first fetch, only process the LAST update (most recent previous message)
+                    if (isFirstFetch === false && lastUpdateId === 0) {
+                        // This is the first batch, take only the last one
+                        const lastUpdate = data.result[data.result.length - 1];
+                        processUpdate(lastUpdate);
+                        lastUpdateId = lastUpdate.update_id;
+                    } else {
+                        // Subsequent fetches: process all new updates
+                        for (const update of data.result) {
+                            processUpdate(update);
+                            if (update.update_id > lastUpdateId) {
+                                lastUpdateId = update.update_id;
+                            }
+                        }
                     }
                 }
             } catch (error) {
@@ -214,6 +520,8 @@
             const fromId = msg.from.id;
 
             if (fromId !== USER_ID) return;
+
+            playBeep();
 
             if (msg.text) {
                 handleText(msg.text);
@@ -237,12 +545,83 @@
         }
 
         function handleText(text) {
-            if (text.trim() === '/clear') {
+            const cmd = text.trim().toLowerCase();
+
+            if (cmd === '/clear') {
                 showWaiting();
                 return;
             }
+
+            if (cmd === '/fullscreen') {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+                return;
+            }
+
+            if (cmd === '/sound off') {
+                notificationSound = false;
+                return;
+            }
+
+            if (cmd === '/sound on') {
+                notificationSound = true;
+                return;
+            }
+
+            if (cmd === '/flash') {
+                flashScreen();
+                return;
+            }
+
+            if (cmd === '/clock') {
+                showClock();
+                return;
+            }
+
+            if (cmd.startsWith('/alert ')) {
+                const alertMsg = text.trim().substring(7);
+                showAlert(alertMsg);
+                return;
+            }
+
+            if (cmd === '/reset') {
+                showWaiting();
+                return;
+            }
+
+            // Regular text
             showContent();
             displayDiv.innerHTML = `<div class="text-display">${escapeHtml(text)}</div>`;
+        }
+
+        function showClock() {
+            stopClock();
+            showContent();
+            displayDiv.innerHTML = `<div class="clock-display" id="clock">00:00:00</div>`;
+            function tick() {
+                const now = new Date();
+                const el = document.getElementById('clock');
+                if (el) {
+                    el.textContent = now.toLocaleTimeString();
+                }
+            }
+            tick();
+            clockInterval = setInterval(tick, 1000);
+        }
+
+        function showAlert(message) {
+            showContent();
+            displayDiv.innerHTML = `
+                <div class="alert-popup">
+                    <div class="alert-box">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-message">${escapeHtml(message)}</div>
+                    </div>
+                </div>
+            `;
         }
 
         async function handleMedia(fileId, type) {
@@ -253,7 +632,7 @@
                 showContent();
 
                 if (type === 'photo') {
-                    displayDiv.innerHTML = `<img class="media-display" src="${fileUrl}" alt="Photo">`;
+                    displayDiv.innerHTML = `<img class="media-display" src="${fileUrl}" alt="Photo" loading="eager">`;
                 }
                 else if (type === 'video') {
                     displayDiv.innerHTML = `
@@ -265,18 +644,28 @@
                 else if (type === 'audio') {
                     displayDiv.innerHTML = `
                         <div class="audio-container">
-                            <div class="audio-icon">🎵</div>
+                            <div class="visualizer">
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                            </div>
                             <audio id="audioPlayer" controls loop>
                                 <source src="${fileUrl}">
                             </audio>
-                            <p>▶ Now Playing...</p>
+                            <p class="audio-label">▶ NOW PLAYING</p>
                         </div>
                     `;
                     tryAutoPlay();
                 }
             } catch (error) {
                 console.error(`${type} load error:`, error);
-                displayDiv.innerHTML = `<div class="error-display">⚠️ Failed to load ${type}</div>`;
+                displayDiv.innerHTML = `
+                    <div class="error-display">
+                        <span class="icon">⚠️</span>
+                        Failed to load ${type}
+                    </div>
+                `;
             }
         }
 
@@ -286,9 +675,8 @@
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.catch(() => {
-                    // Autoplay blocked, controls are visible so user can manually play
-                    const p = document.querySelector('.audio-container p');
-                    if (p) p.textContent = '👆 Click play to start';
+                    const p = document.querySelector('.audio-label');
+                    if (p) p.textContent = '👆 TAP PLAY TO START';
                 });
             }
         }
@@ -297,51 +685,93 @@
             const mimeType = doc.mime_type || '';
             const fileName = (doc.file_name || '').toLowerCase();
 
-            // HTML files → use iframe with direct src (no CORS issues)
             if (mimeType.startsWith('text/html') || HTML_EXTS.some(ext => fileName.endsWith(ext))) {
-                await handleFileInFrame(doc.file_id);
+                await handleHtmlDocument(doc.file_id);
                 return;
             }
 
-            // Plain text files → use iframe (browsers render text natively in iframe)
             if (mimeType.startsWith('text/') || TEXT_EXTS.some(ext => fileName.endsWith(ext))) {
-                await handleFileInFrame(doc.file_id);
+                await handleTextDocument(doc.file_id);
                 return;
             }
 
-            // Audio via document
             if (AUDIO_MIMES.includes(mimeType) || AUDIO_EXTS.some(ext => fileName.endsWith(ext))) {
                 handleMedia(doc.file_id, 'audio');
                 return;
             }
 
-            // Video via document
             if (VIDEO_MIMES.includes(mimeType) || VIDEO_EXTS.some(ext => fileName.endsWith(ext))) {
                 handleMedia(doc.file_id, 'video');
                 return;
             }
 
-            // Images via document
             if (mimeType.startsWith('image/') || IMAGE_EXTS.some(ext => fileName.endsWith(ext))) {
                 handleMedia(doc.file_id, 'photo');
                 return;
             }
 
-            // Unsupported
             showContent();
-            displayDiv.innerHTML = `<div class="error-display">⚠️ Unsupported: ${escapeHtml(fileName || mimeType)}</div>`;
+            displayDiv.innerHTML = `
+                <div class="error-display">
+                    <span class="icon">📄</span>
+                    Unsupported file<br>
+                    <small style="font-size:1rem;">${escapeHtml(fileName || mimeType)}</small>
+                </div>
+            `;
         }
 
-        async function handleFileInFrame(fileId) {
+        async function handleHtmlDocument(fileId) {
             try {
                 const fileUrl = await getFileUrl(fileId);
                 if (!fileUrl) throw new Error('File URL not found');
+
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Failed to fetch HTML');
+                const htmlContent = await response.text();
+
                 showContent();
-                // Direct iframe src – no CORS problem, browser loads file from Telegram CDN
-                displayDiv.innerHTML = `<iframe class="html-frame" src="${fileUrl}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+                const escapedHtml = htmlContent.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                displayDiv.innerHTML = `<iframe class="html-frame" srcdoc="${escapedHtml}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>`;
             } catch (error) {
-                console.error('Frame load error:', error);
-                displayDiv.innerHTML = `<div class="error-display">⚠️ Failed to load file</div>`;
+                console.error('HTML load error:', error);
+                try {
+                    const fileUrl = await getFileUrl(fileId);
+                    showContent();
+                    displayDiv.innerHTML = `<iframe class="html-frame" src="${fileUrl}" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>`;
+                } catch (e) {
+                    displayDiv.innerHTML = `
+                        <div class="error-display">
+                            <span class="icon">❌</span>
+                            Failed to load HTML file
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function handleTextDocument(fileId) {
+            try {
+                const fileUrl = await getFileUrl(fileId);
+                if (!fileUrl) throw new Error('File URL not found');
+
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Failed to fetch text file');
+                const textContent = await response.text();
+
+                showContent();
+                displayDiv.innerHTML = `
+                    <div class="text-display" style="font-size: clamp(1rem, 4vw, 2rem); white-space: pre-wrap; word-break: break-all;">
+                        ${escapeHtml(textContent)}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Text file load error:', error);
+                displayDiv.innerHTML = `
+                    <div class="error-display">
+                        <span class="icon">📝</span>
+                        Failed to load text file
+                    </div>
+                `;
             }
         }
 
@@ -376,19 +806,23 @@
         // ==================== INIT ====================
 
         if (BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || USER_ID === "YOUR_USER_ID_HERE") {
-            showContent();
+            waitingDiv.style.display = 'none';
+            displayDiv.style.display = 'block';
             displayDiv.innerHTML = `
                 <div class="error-display">
-                    ⚠️ Please set BOT_TOKEN and USER_ID!<br>
-                    <small style="font-size:1rem;">Edit the CONFIGURATION section in the script.</small>
+                    <span class="icon">⚙️</span>
+                    Please configure BOT_TOKEN and USER_ID<br>
+                    <small style="font-size:1rem;">Edit the CONFIGURATION section in the script</small>
                 </div>
             `;
         } else {
+            updateBattery();
             startPolling();
         }
 
         window.addEventListener('beforeunload', () => {
             stopPolling();
+            stopClock();
         });
     </script>
 </body>
