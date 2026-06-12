@@ -1,9 +1,17 @@
+
+# 🔥 API চেঞ্জ হয়ে গেছে! ফিক্সড কোড 🔥
+
+ব্রো, সমস্যা ধরা পড়েছে — `MLCEngine.create` ফাংশনটা আর নেই, WebLLM লাইব্রেরির API আপডেট হয়েছে। এখন `CreateMLCEngine` নামে আলাদা ফাংশন ইউজ করতে হয়।
+
+নিচের ফিক্সড ভার্সন কপি কর:
+
+```html
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FEEK_TERMINAL v2 // DEBUG MODE</title>
+    <title>FEEK_TERMINAL v3 // API FIX</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -19,7 +27,6 @@
             --border: #1f2937;
             --font: 'Courier New', 'Fira Code', monospace;
         }
-
         * {
             margin: 0;
             padding: 0;
@@ -48,7 +55,6 @@
             pointer-events: none;
             z-index: 9999;
         }
-
         .header {
             background: var(--panel);
             border-bottom: 2px solid var(--neon);
@@ -126,7 +132,6 @@
                 opacity: 0.3;
             }
         }
-
         .chat-container {
             flex: 1;
             overflow-y: auto;
@@ -143,7 +148,6 @@
             background: var(--neon-dim);
             border-radius: 2px;
         }
-
         .msg {
             max-width: 92%;
             padding: 8px 12px;
@@ -215,7 +219,6 @@
         .msg.ai .sender {
             color: var(--cyan);
         }
-
         .input-area {
             background: var(--panel);
             border-top: 1px solid var(--border);
@@ -276,7 +279,6 @@
             padding: 6px 10px;
             letter-spacing: 0;
         }
-
         @media (max-width: 480px) {
             .header {
                 padding: 8px 10px;
@@ -317,7 +319,7 @@
             <span class="logo-icon">💀</span>
             <span>
                 <span class="logo-text">FEEK_TERMINAL</span>
-                <span class="logo-sub">// v2.0 DEBUG MODE</span>
+                <span class="logo-sub">// v3.0 API FIX</span>
             </span>
         </div>
         <button class="btn btn-sm" onclick="retryLoad()" id="retryBtn">RETRY 🔄</button>
@@ -332,12 +334,11 @@
     </div>
 
     <script type="module">
-        import { MLCEngine } from "https://esm.run/@mlc-ai/web-llm";
+        // FIXED: নতুন API — CreateMLCEngine ফাংশন ইউজ করছি
+        import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
-        // ===== SYSTEM PROMPT =====
         const SYSTEM_PROMPT = `তুই ফিক (Feek) - একজন কুল হ্যাকার অ্যাসিস্ট্যান্ট। তুই বাংলায় কথা বলবি, ইমোজি ইউজ করবি, কোড দিলে প্রপার ফরম্যাটে দিবি। তুই হ্যাকিং, প্রোগ্রামিং, সাইবার সিকিউরিটির এক্সপার্ট।`;
 
-        // ===== GLOBALS =====
         let engine = null;
         let isReady = false;
         let history = [{ role: "system", content: SYSTEM_PROMPT }];
@@ -348,7 +349,6 @@
         const statusDot = document.getElementById('statusDot');
         const retryBtn = document.getElementById('retryBtn');
 
-        // ===== HELPERS =====
         function log(msg, cls = 'system-msg') {
             const d = document.createElement('div');
             d.className = 'msg ' + cls;
@@ -374,73 +374,73 @@
             if (yes) userInput.focus();
         }
 
-        // ===== INIT =====
         async function initModel() {
             setStatus('loading');
             enableInput(false);
             isReady = false;
             retryBtn.disabled = true;
 
-            log('🔍 <b>WebGPU চেক:</b> ' + (navigator.gpu ? '<span style="color:#0f0">YES ✅</span>' :
+            log('🔍 <b>WebGPU:</b> ' + (navigator.gpu ? '<span style="color:#0f0">YES ✅</span>' :
                 '<span style="color:#f00">NO ❌</span>'));
-            log('🌐 <b>Browser:</b> ' + navigator.userAgent.match(/(Chrome|Edge|Firefox|Safari)\/[0-9.]+/)?.[0] ||
-                'Unknown');
+            log('🌐 <b>Browser:</b> ' + (navigator.userAgent.match(/(Chrome|Edge)\/[0-9.]+/)?.[0] || 'Unknown'));
             log('📱 <b>Platform:</b> ' + navigator.platform);
 
             if (!navigator.gpu) {
-                logError('WebGPU NOT AVAILABLE!<br><br>👉 Chrome 121+ লাগবে<br>👉 Edge 121+ লাগবে<br>👉 Firefox/Safari কাজ করবে না<br>👉 iPhone/iPad কাজ করবে না');
-                log('💡 <b>সলিউশন:</b> Chrome Browser ইন্সটল করো');
+                logError('WebGPU নেই! Chrome 121+ লাগবে');
                 setStatus('offline');
                 retryBtn.disabled = false;
                 return;
             }
 
-            log('⏳ মডেল লোড হচ্ছে... (<b>Gemma 2B ~1.4GB</b>)');
-            log('⏱️ প্রথমবার ২-৫ মিনিট লাগবে, WiFi চালু রাখো');
-            log('💾 এরপর অটো ক্যাশ হবে IndexedDB তে');
+            log('⏳ <b>CreateMLCEngine</b> কল করছি...');
+            log('📦 মডেল: Gemma 2B Q4 (~1.4GB)');
+            log('⏱️ ডাউনলোড শুরু হলে % দেখাবে...');
 
             try {
                 const startTime = Date.now();
-                engine = await MLCEngine.create({
-                    model: "gemma-2-2b-it-q4f16_1-MLC",
-                    modelCache: "indexedDB",
-                    // Progress callback
-                    initProgressCallback: (report) => {
-                        const pct = report.progress ? (report.progress * 100).toFixed(1) : '?';
-                        log(`📥 ডাউনলোড: <b>${pct}%</b> — ${report.text || ''}`);
-                    },
-                });
-                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
+                // ====== FIXED API CALL ======
+                engine = await CreateMLCEngine(
+                    "gemma-2-2b-it-q4f16_1-MLC", {
+                        modelCache: "indexedDB",
+                        initProgressCallback: (report) => {
+                            const pct = report.progress ? (report.progress * 100).toFixed(1) : '?';
+                            log(`📥 <b>${pct}%</b> — ${report.text || 'ডাউনলোড হচ্ছে...'}`);
+                        },
+                    }
+                );
+                // =============================
+
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                 isReady = true;
                 setStatus('online');
                 enableInput(true);
                 retryBtn.disabled = false;
-                logSuccess(`AI READY! (${elapsed} সেকেন্ড)<br>প্রশ্ন করো ব্রো... 💀🚀`);
+                logSuccess(`AI READY! ⚡ (${elapsed}s)<br>প্রশ্ন করো ব্রো... 💀🚀`);
                 userInput.focus();
 
             } catch (err) {
-                console.error('MLCEngine error:', err);
+                console.error(err);
                 const msg = err.message || String(err);
-                logError('মডেল লোড ফেইল!<br><br><b>কারণ:</b> ' + msg.replace(/</g, '&lt;'));
+                logError('লোড ফেইল!<br><b>এরর:</b> ' + msg.replace(/</g, '&lt;'));
+
                 if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed to fetch')) {
-                    logError('নেটওয়ার্ক ইস্যু! HuggingFace CDN ব্লক হতে পারে');
-                    log('💡 VPN ট্রাই করো অথবা অন্য নেটওয়ার্ক');
+                    logError('নেটওয়ার্ক ইস্যু! CDN ব্লক হতে পারে');
+                    log('💡 VPN ট্রাই করো বা WiFi চেঞ্জ করো');
                 }
                 if (msg.includes('quota') || msg.includes('storage')) {
                     logError('স্টোরেজ ফুল! IndexedDB ক্লিয়ার করো');
-                    log('💡 Chrome Settings → Site Settings → Storage → Clear');
                 }
                 if (msg.includes('WebGPU')) {
                     logError('WebGPU ইনিশিয়ালাইজেশন ফেইল');
                     log('💡 chrome://flags → WebGPU → Enabled');
                 }
+
                 setStatus('offline');
                 retryBtn.disabled = false;
             }
         }
 
-        // ===== RETRY =====
         window.retryLoad = function() {
             chatBox.innerHTML = '';
             log('🔄 রিট্রাই করছি...');
@@ -452,7 +452,6 @@
             initModel();
         };
 
-        // ===== SEND =====
         window.sendMsg = async function() {
             if (!isReady || !engine) return;
             const text = userInput.value.trim();
@@ -461,14 +460,12 @@
             userInput.value = '';
             enableInput(false);
 
-            // User msg
             const uDiv = document.createElement('div');
             uDiv.className = 'msg user';
-            uDiv.innerHTML = '<div class="sender">[YOU]</div>' + text.replace(/</g, '&lt;').replace(/\n/g, '<br>');
+            uDiv.innerHTML = '<div class="sender">[YOU]</div>' + text.replace(/</g, '&lt;');
             chatBox.appendChild(uDiv);
             history.push({ role: "user", content: text });
 
-            // Typing
             const tDiv = document.createElement('div');
             tDiv.className = 'msg ai';
             tDiv.id = 'typing';
@@ -477,14 +474,24 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                const reply = await engine.chat(history);
+                // FIXED: নতুন chat API — OpenAI-compatible
+                const completion = await engine.chat.completions.create({
+                    messages: history,
+                    temperature: 0.7,
+                    max_tokens: 1024,
+                });
+                const reply = completion.choices[0].message.content;
+
                 document.getElementById('typing')?.remove();
 
                 const aDiv = document.createElement('div');
                 aDiv.className = 'msg ai';
                 const fmt = reply
-                    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre style="background:#000;border:1px solid #333;padding:8px;border-radius:3px;overflow-x:auto;font-size:10px;color:#0f0;">$2</pre>')
-                    .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.4);padding:1px 5px;border-radius:2px;color:#ff0;">$1</code>')
+                    .replace(/```(\w*)\n([\s\S]*?)```/g,
+                        '<pre style="background:#000;border:1px solid #333;padding:8px;border-radius:3px;overflow-x:auto;font-size:10px;color:#0f0;">$2</pre>'
+                        )
+                    .replace(/`([^`]+)`/g,
+                        '<code style="background:rgba(0,0,0,0.4);padding:1px 5px;border-radius:2px;color:#ff0;">$1</code>')
                     .replace(/\n/g, '<br>');
                 aDiv.innerHTML = '<div class="sender">[FEEK]</div>' + fmt;
                 chatBox.appendChild(aDiv);
@@ -495,7 +502,7 @@
                 }
             } catch (err) {
                 document.getElementById('typing')?.remove();
-                logError('রিপ্লাই জেনারেশন ফেইল: ' + (err.message || err));
+                logError('রিপ্লাই ফেইল: ' + (err.message || err));
                 history.pop();
             }
 
@@ -505,8 +512,8 @@
         };
 
         // ===== START =====
-        log('💀 <b>FEEK_TERMINAL v2.0</b> — DEBUG MODE');
-        log('🔗 সব স্ট্যাটাস এখানে দেখতে পারবি...');
+        log('💀 <b>FEEK_TERMINAL v3.0</b> — API FIX');
+        log('🔧 <b>CreateMLCEngine</b> + OpenAI Chat API');
         initModel();
     </script>
 </body>
