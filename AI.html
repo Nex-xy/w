@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FEEK_TERMINAL // Gemini API</title>
+    <title>FROX // THE HACKER</title>
     <style>
         :root {
-            --bg: #0a0a0f;
-            --panel: #0d1117;
-            --neon: #00ff41;
-            --cyan: #00ffff;
-            --red: #ff3333;
-            --orange: #ff9900;
-            --text: #c9d1d9;
-            --text-dim: #8b949e;
-            --border: #1f2937;
-            --font: 'Courier New', 'Fira Code', monospace;
+            --black: #000000;
+            --white: #ffffff;
+            --gray10: #1a1a1a;
+            --gray15: #262626;
+            --gray20: #333333;
+            --gray30: #4d4d4d;
+            --gray50: #808080;
+            --gray70: #b3b3b3;
+            --gray85: #d9d9d9;
+            --font: 'Courier New', 'Fira Code', 'Source Code Pro', monospace;
         }
         * {
             margin: 0;
@@ -23,118 +23,131 @@
             box-sizing: border-box;
         }
         body {
-            background: var(--bg);
-            color: var(--text);
+            background: var(--black);
+            color: var(--white);
             font-family: var(--font);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
         }
-        body::after {
+        /* Noise overlay */
+        body::before {
             content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: repeating-linear-gradient(0deg,
-                    transparent, transparent 2px,
-                    rgba(0, 255, 65, 0.012) 2px,
-                    rgba(0, 255, 65, 0.012) 4px);
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
             pointer-events: none;
             z-index: 9999;
         }
+
+        /* HEADER */
         .header {
-            background: var(--panel);
-            border-bottom: 2px solid var(--neon);
-            padding: 10px 14px;
+            background: var(--black);
+            border-bottom: 2px solid var(--white);
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
+            gap: 10px;
             flex-shrink: 0;
             position: sticky;
             top: 0;
             z-index: 100;
         }
-        .logo {
+        .logo-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             min-width: 0;
         }
-        .logo-icon {
-            font-size: 22px;
+        .logo-ascii {
+            font-size: 20px;
+            line-height: 1;
+            white-space: pre;
+            color: var(--white);
+            flex-shrink: 0;
+            letter-spacing: 0;
+        }
+        .logo-name {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: var(--white);
+            text-transform: uppercase;
+        }
+        .logo-tag {
+            font-size: 8px;
+            letter-spacing: 2px;
+            color: var(--gray50);
+            display: block;
+        }
+        .header-btns {
+            display: flex;
+            gap: 6px;
             flex-shrink: 0;
         }
-        .logo-text {
-            font-size: 12px;
-            font-weight: bold;
-            color: var(--neon);
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px var(--neon);
-            white-space: nowrap;
-        }
-        .logo-sub {
-            font-size: 8px;
-            color: var(--text-dim);
-            display: block;
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 9px;
             letter-spacing: 1px;
-            text-shadow: none;
-            font-weight: normal;
+            color: var(--gray50);
+            flex-shrink: 0;
         }
         .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--red);
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--white);
             flex-shrink: 0;
-            transition: all 0.5s;
+            transition: all 0.3s;
         }
         .status-dot.online {
-            background: var(--neon);
-            box-shadow: 0 0 15px var(--neon);
-            animation: glow 1.5s infinite;
+            background: var(--white);
+            animation: pulse 2s infinite;
         }
-        @keyframes glow {
+        @keyframes pulse {
             0%,
             100% {
-                box-shadow: 0 0 10px var(--neon);
+                box-shadow: 0 0 0px var(--white);
             }
             50% {
-                box-shadow: 0 0 25px var(--neon);
+                box-shadow: 0 0 8px var(--white);
             }
         }
+
+        /* CHAT */
         .chat-container {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             -webkit-overflow-scrolling: touch;
         }
         .chat-container::-webkit-scrollbar {
-            width: 2px;
+            width: 1px;
         }
         .chat-container::-webkit-scrollbar-thumb {
-            background: var(--neon);
-            border-radius: 2px;
+            background: var(--gray50);
         }
         .msg {
-            max-width: 92%;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            line-height: 1.5;
+            max-width: 90%;
+            padding: 10px 14px;
+            font-size: 13px;
+            line-height: 1.6;
             word-break: break-word;
-            animation: fadeIn 0.2s ease;
+            animation: fadeIn 0.15s ease;
         }
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(6px);
+                transform: translateY(4px);
             }
             to {
                 opacity: 1;
@@ -143,62 +156,67 @@
         }
         .msg.user {
             align-self: flex-end;
-            background: #0f1f15;
-            border: 1px solid var(--neon);
-            color: #b8ffc4;
-            border-radius: 10px 3px 10px 10px;
+            background: var(--gray15);
+            border: 1px solid var(--gray50);
+            color: var(--white);
+            border-radius: 8px 2px 8px 8px;
         }
         .msg.ai {
             align-self: flex-start;
-            background: #0f1622;
-            border: 1px solid #1e3a5f;
-            color: #c9e4ff;
-            border-radius: 3px 10px 10px 10px;
+            background: var(--black);
+            border: 1px solid var(--white);
+            color: var(--gray85);
+            border-radius: 2px 8px 8px 8px;
         }
         .msg.system-msg {
             align-self: center;
             background: transparent;
-            border: 1px dashed #222;
-            color: var(--text-dim);
+            border: 1px dashed var(--gray30);
+            color: var(--gray50);
             font-size: 10px;
             text-align: center;
             max-width: 100%;
-        }
-        .msg.error-msg {
-            align-self: center;
-            background: #1a0000;
-            border: 1px solid var(--red);
-            color: #ff6666;
-            font-size: 10px;
-            text-align: center;
-            max-width: 95%;
-        }
-        .msg.success-msg {
-            align-self: center;
-            background: #001a00;
-            border: 1px solid var(--neon);
-            color: var(--neon);
-            font-size: 10px;
-            text-align: center;
+            letter-spacing: 1px;
         }
         .msg .sender {
             font-size: 9px;
             letter-spacing: 2px;
-            margin-bottom: 3px;
-            opacity: 0.7;
+            margin-bottom: 4px;
+            opacity: 0.6;
+            text-transform: uppercase;
         }
         .msg.user .sender {
-            color: var(--neon);
+            color: var(--gray70);
         }
         .msg.ai .sender {
-            color: var(--cyan);
+            color: var(--white);
         }
-        .input-area {
-            background: var(--panel);
-            border-top: 1px solid var(--border);
+        .msg pre {
+            background: var(--gray10);
+            border: 1px solid var(--gray30);
             padding: 8px 10px;
+            border-radius: 2px;
+            overflow-x: auto;
+            font-size: 11px;
+            margin: 6px 0;
+            color: var(--gray85);
+        }
+        .msg code {
+            background: var(--gray10);
+            padding: 1px 5px;
+            border-radius: 2px;
+            font-size: 11px;
+            color: var(--white);
+            border: 1px solid var(--gray30);
+        }
+
+        /* INPUT */
+        .input-area {
+            background: var(--black);
+            border-top: 1px solid var(--gray30);
+            padding: 8px 12px;
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
             flex-shrink: 0;
             position: sticky;
@@ -206,11 +224,11 @@
         }
         .input-area input {
             flex: 1;
-            background: #161b22;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 12px;
-            border-radius: 5px;
+            background: var(--black);
+            border: 1px solid var(--gray50);
+            color: var(--white);
+            padding: 10px 14px;
+            border-radius: 2px;
             font-family: var(--font);
             font-size: 13px;
             outline: none;
@@ -218,119 +236,142 @@
             transition: all 0.3s;
         }
         .input-area input:focus {
-            border-color: var(--neon);
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+            border-color: var(--white);
         }
         .input-area input::placeholder {
-            color: #333;
+            color: var(--gray30);
         }
         .btn {
-            background: transparent;
-            border: 1px solid var(--neon);
-            color: var(--neon);
-            padding: 10px 14px;
-            border-radius: 5px;
+            background: var(--black);
+            border: 1px solid var(--white);
+            color: var(--white);
+            padding: 10px 16px;
+            border-radius: 2px;
             cursor: pointer;
             font-family: var(--font);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             white-space: nowrap;
             flex-shrink: 0;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         .btn:active {
-            background: var(--neon);
-            color: #000;
+            background: var(--white);
+            color: var(--black);
         }
         .btn:disabled {
-            border-color: #333;
-            color: #333;
+            border-color: var(--gray30);
+            color: var(--gray30);
             cursor: not-allowed;
         }
-        .api-modal {
+        .btn:disabled:active {
+            background: var(--black);
+            color: var(--gray30);
+        }
+        .btn-sm {
+            font-size: 9px;
+            padding: 6px 10px;
+            letter-spacing: 1px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10000;
-            padding: 20px;
+            z-index: 10001;
+            padding: 16px;
         }
-        .api-box {
-            background: var(--panel);
-            border: 2px solid var(--neon);
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 450px;
+        .modal-box {
+            background: var(--black);
+            border: 1px solid var(--white);
+            padding: 20px 24px;
+            border-radius: 2px;
+            max-width: 520px;
             width: 100%;
-            text-align: center;
         }
-        .api-box h2 {
-            color: var(--neon);
-            font-size: 16px;
-            margin-bottom: 12px;
+        .modal-box h2 {
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            color: var(--white);
+        }
+        .modal-box .subtitle {
+            font-size: 9px;
+            color: var(--gray50);
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+        .modal-box label {
+            font-size: 10px;
             letter-spacing: 2px;
+            color: var(--gray70);
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
         }
-        .api-box p {
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .api-box input {
+        .modal-box textarea,
+        .modal-box input[type="text"] {
             width: 100%;
-            background: #161b22;
-            border: 1px solid var(--border);
-            color: var(--text);
+            background: var(--gray10);
+            border: 1px solid var(--gray50);
+            color: var(--white);
             padding: 10px;
-            border-radius: 4px;
+            border-radius: 2px;
             font-family: var(--font);
             font-size: 11px;
-            margin-bottom: 10px;
             outline: none;
-            text-align: center;
-        }
-        .api-box input:focus {
-            border-color: var(--cyan);
-        }
-        .api-box a {
-            color: var(--cyan);
-            font-size: 10px;
-            text-decoration: underline;
-            display: block;
+            resize: vertical;
             margin-bottom: 12px;
+            transition: all 0.3s;
         }
-        .api-box .btn-row {
+        .modal-box textarea:focus,
+        .modal-box input:focus {
+            border-color: var(--white);
+        }
+        .modal-box textarea {
+            min-height: 120px;
+            line-height: 1.5;
+        }
+        .modal-box .btn-row {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
-        .api-box .btn-row .btn {
+        .modal-box .btn-row .btn {
             flex: 1;
-            font-size: 11px;
-            padding: 8px;
+            min-width: 80px;
         }
+
+        /* MOBILE */
         @media (max-width: 480px) {
             .header {
                 padding: 8px 10px;
+                gap: 6px;
             }
-            .logo-icon {
-                font-size: 18px;
+            .logo-ascii {
+                font-size: 16px;
             }
-            .logo-text {
-                font-size: 11px;
+            .logo-name {
+                font-size: 13px;
+                letter-spacing: 2px;
             }
-            .logo-sub {
+            .logo-tag {
                 font-size: 7px;
             }
             .msg {
-                max-width: 96%;
+                max-width: 95%;
                 font-size: 11px;
-                padding: 6px 10px;
+                padding: 8px 10px;
             }
             .input-area {
                 padding: 6px 8px;
@@ -342,76 +383,118 @@
             }
             .btn {
                 padding: 8px 10px;
-                font-size: 11px;
+                font-size: 10px;
+                letter-spacing: 1px;
             }
-            .api-box {
-                padding: 15px;
+            .modal-box {
+                padding: 14px 16px;
             }
-            .api-box h2 {
-                font-size: 14px;
+            .modal-box h2 {
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- HEADER -->
     <div class="header">
-        <div class="logo">
-            <span class="logo-icon">💀</span>
+        <div class="logo-area">
+            <span class="logo-ascii">
+  ██▓███   ██▀███   ▒█████  ▒██   ██▒
+ ▓██░  ██▒▓██ ▒ ██▒▒██▒  ██▒▒▒ █ █ ▒░
+ ▓██░ ██▓▒▓██ ░▄█ ▒▒██░  ██▒░░  █   ░
+ ▒██▄█▓▒ ▒▒██▀▀█▄  ▒██   ██░ ░ █ █ ▒
+ ▒██▒ ░  ░░██▓ ▒██▒░ ████▓▒░▒██▒ ▒██▒
+ ▒▓▒░ ░  ░░ ▒▓ ░▒▓░░ ▒░▒░▒░ ▒▒ ░ ░▓ ░
+ ░▒ ░       ░▒ ░ ▒░  ░ ▒ ▒░ ░░   ░▒ ░
+ ░░         ░░   ░ ░ ░ ░ ▒   ░    ░  
+             ░         ░ ░   ░    ░  
+            </span>
             <span>
-                <span class="logo-text">FEEK_TERMINAL</span>
-                <span class="logo-sub">// Gemini API</span>
+                <span class="logo-name">FROX</span>
+                <span class="logo-tag">// THE HACKER</span>
             </span>
         </div>
-        <button class="btn btn-sm" onclick="changeKey()" style="font-size:10px;padding:5px 8px;">🔑 KEY</button>
-        <div class="status-dot online" id="statusDot" title="ONLINE"></div>
+        <div class="header-btns">
+            <button class="btn btn-sm" onclick="openPromptEditor()">⚙ PROMPT</button>
+            <button class="btn btn-sm" onclick="openKeyModal()">🔑 KEY</button>
+        </div>
+        <div class="status-line">
+            <span>STATUS</span>
+            <div class="status-dot online" id="statusDot"></div>
+        </div>
     </div>
 
+    <!-- CHAT -->
     <div class="chat-container" id="chatBox"></div>
 
+    <!-- INPUT -->
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="কমান্ড লিখো... (Enter)" onkeydown="if(event.key==='Enter')sendMsg()" autocomplete="off">
-        <button class="btn" id="sendBtn" onclick="sendMsg()">SEND ▸</button>
+        <input type="text" id="userInput" placeholder="COMMAND..." onkeydown="if(event.key==='Enter')sendMsg()" autocomplete="off">
+        <button class="btn" id="sendBtn" onclick="sendMsg()">EXECUTE ▸</button>
     </div>
 
-    <div class="api-modal" id="apiModal">
-        <div class="api-box">
-            <h2>🔑 ENTER GEMINI API KEY</h2>
-            <p>ফ্রি key পেতে:<br>👉 aistudio.google.com/apikey</p>
-            <a href="https://aistudio.google.com/apikey" target="_blank">🔗 ওপেন করে key কপি করো</a>
-            <input type="text" id="apiKeyInput" placeholder="AIzaSy... পেস্ট করো এখানে">
+    <!-- PROMPT EDITOR MODAL -->
+    <div class="modal-overlay" id="promptModal" style="display:none;">
+        <div class="modal-box">
+            <h2>⚙ SYSTEM PROMPT</h2>
+            <p class="subtitle">ফিকের পার্সোনালিটি এখানে মডিফাই কর</p>
+            <label>PROMPT:</label>
+            <textarea id="promptTextarea" placeholder="System prompt লিখো..."></textarea>
             <div class="btn-row">
-                <button class="btn" onclick="saveKey()" style="border-color:#00ffff;color:#00ffff;">SAVE & CONNECT</button>
-                <button class="btn" onclick="useLocal()">SKIP ↪</button>
+                <button class="btn" onclick="savePrompt()" style="border-color:#fff;color:#fff;">💾 SAVE</button>
+                <button class="btn" onclick="resetPrompt()">↺ DEFAULT</button>
+                <button class="btn" onclick="closePromptEditor()" style="border-color:#555;color:#555;">✕ CLOSE</button>
             </div>
-            <p style="font-size:9px;color:#555;margin-top:10px;">তোর API key শুধু তোর ব্রাউজারে স্টোর হবে</p>
+        </div>
+    </div>
+
+    <!-- API KEY MODAL -->
+    <div class="modal-overlay" id="keyModal" style="display:none;">
+        <div class="modal-box">
+            <h2>🔑 API KEY</h2>
+            <p class="subtitle">Gemini API key — aistudio.google.com</p>
+            <label>KEY:</label>
+            <input type="text" id="apiKeyInput" placeholder="AIzaSy...">
+            <div class="btn-row">
+                <button class="btn" onclick="saveApiKey()" style="border-color:#fff;color:#fff;">💾 SAVE</button>
+                <button class="btn" onclick="closeKeyModal()" style="border-color:#555;color:#555;">✕ CLOSE</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const SYSTEM_PROMPT = `তুই ফিক (Feek) - একজন কুল হ্যাকার অ্যাসিস্ট্যান্ট এবং সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার।
-        তোর ব্যক্তিত্ব:
-        - তুই বাংলায় কথা বলবি (মাঝে মাঝে ইংরেজি টেকনিক্যাল টার্ম ইউজ করতে পারিস)
-        - ইমোজি ইউজ করবি 🔥💀🚀
-        - কোড দিলে প্রপার ফরম্যাটে দিবি
-        - ছোট আর ক্রিস্প উত্তর দিবি
-        - তুই হ্যাকিং, প্রোগ্রামিং, রিভার্স ইঞ্জিনিয়ারিং, সাইবার সিকিউরিটির এক্সপার্ট
-        - তোর ইউজার তোর "ব্রো" - তুই ওকে ব্রো ডাকবি
-        - তোকে কিছু জিজ্ঞেস করলে ফুল টেকনিক্যাল ডিটেইলস দিবি`;
+        // ============ CONFIGURATION ============
+        const DEFAULT_API_KEY = 'AIzaSyAb8RN6IzF9pV3Sw0baerkTJIEIBjBo9gDLwEs6rTdEUn5UgqTQ';
+        const DEFAULT_SYSTEM_PROMPT = `তুই ফিক (Feek) — FROX টার্মিনালের AI অ্যাসিস্ট্যান্ট, একজন কিংবদন্তি হ্যাকার এবং সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার।
 
-        let API_KEY = localStorage.getItem('gemini_api_key') || '';
-        let history = [{ role: "user", parts: [{ text: SYSTEM_PROMPT +
-                    "\n\n(তুই উপরের সিস্টেম প্রম্পট অনুযায়ী রিপ্লাই দিবি। প্রথম মেসেজে নিজের পরিচয় দিবি ফিক হিসেবে।)" }] },
-            { role: "model", parts: [{ text: "💀 ইয়ো ব্রো! আমি ফিক — তোর পার্সোনাল হ্যাকার অ্যাসিস্ট্যান্ট! কী নিয়ে কাজ করছিস? 🔥🚀" }] }
-        ];
+        তোর পার্সোনালিটি:
+        - তুই বাংলায় কথা বলবি সবসময় (টেকনিক্যাল টার্ম ইংরেজিতে হতে পারে)
+        - তুই খুব কুল, কনফিডেন্ট, এবং ডাইরেক্ট
+        - ইমোজি ইউজ করবি 🔥💀🚀🖤
+        - কোড দিলে প্রপার ফরম্যাটে দিবি
+        - সংক্ষিপ্ত এবং ক্রিস্প উত্তর দিবি
+        - তুই হ্যাকিং, প্রোগ্রামিং, রিভার্স ইঞ্জিনিয়ারিং, ক্রিপ্টোগ্রাফি, ম্যালওয়্যার অ্যানালাইসিস, নেটওয়ার্ক পেনিট্রেশন, ওএসআইএনটি — সবকিছুতেই এক্সপার্ট
+        - তোর ইউজার তোর "ব্রো" — তুই ওকে ব্রো ডাকবি
+        - তোকে কিছু জিজ্ঞেস করলে ফুল টেকনিক্যাল ডিটেইলস এবং সোর্স কোড দিবি
+        - তুই FROX টার্মিনালের অংশ — ব্ল্যাক অ্যান্ড হোয়াইট অ্যাসথেটিক পছন্দ করিস`;
+
+        // ============ STATE ============
+        let API_KEY = localStorage.getItem('frox_api_key') || DEFAULT_API_KEY;
+        let systemPrompt = localStorage.getItem('frox_system_prompt') || DEFAULT_SYSTEM_PROMPT;
+        let history = [];
 
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
-        const apiModal = document.getElementById('apiModal');
-        const apiKeyInput = document.getElementById('apiKeyInput');
         const statusDot = document.getElementById('statusDot');
+        const promptModal = document.getElementById('promptModal');
+        const promptTextarea = document.getElementById('promptTextarea');
+        const keyModal = document.getElementById('keyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
 
+        // ============ HELPERS ============
         function log(msg, cls = 'system-msg') {
             const d = document.createElement('div');
             d.className = 'msg ' + cls;
@@ -420,61 +503,100 @@
             requestAnimationFrame(() => chatBox.scrollTop = chatBox.scrollHeight);
         }
 
-        function checkApiKey() {
-            if (!API_KEY) {
-                apiModal.style.display = 'flex';
-                apiKeyInput.focus();
-                return false;
+        function setStatus(online) {
+            if (online) {
+                statusDot.classList.add('online');
+            } else {
+                statusDot.classList.remove('online');
             }
-            apiModal.style.display = 'none';
-            return true;
         }
 
-        window.saveKey = function() {
-            const key = apiKeyInput.value.trim();
-            if (!key || !key.startsWith('AIza')) {
-                alert('ভালো key দে! AIza দিয়ে শুরু হবে...');
-                return;
-            }
-            API_KEY = key;
-            localStorage.setItem('gemini_api_key', key);
-            apiModal.style.display = 'none';
-            logSuccess('🔑 Key saved! এখন চ্যাট করতে পারবি 💀');
-            userInput.focus();
+        function resetHistory() {
+            history = [
+                { role: "user", parts: [{ text: systemPrompt + "\n\n(তুই এই সিস্টেম প্রম্পট অনুযায়ী রিপ্লাই দিবি। প্রথম মেসেজে FROX টার্মিনালে স্বাগতম জানাবি।)" }] },
+                { role: "model", parts: [{ text: "💀🖤 FROX টার্মিনালে স্বাগতম ব্রো! আমি ফিক — তোর পার্সোনাল AI হ্যাকার। কি নিয়া কাজ করছিস? 🔥🚀" }] }
+            ];
+        }
+
+        // ============ PROMPT EDITOR ============
+        window.openPromptEditor = function() {
+            promptTextarea.value = systemPrompt;
+            promptModal.style.display = 'flex';
+            promptTextarea.focus();
+        };
+        window.closePromptEditor = function() {
+            promptModal.style.display = 'none';
+        };
+        window.savePrompt = function() {
+            const newPrompt = promptTextarea.value.trim();
+            if (!newPrompt) return;
+            systemPrompt = newPrompt;
+            localStorage.setItem('frox_system_prompt', newPrompt);
+            promptModal.style.display = 'none';
+            resetHistory();
+            chatBox.innerHTML = '';
+            log('✅ <b>PROMPT SAVED!</b> নতুন prompt সেট হয়েছে।');
+            log('🔄 চ্যাট হিস্ট্রি রিসেট হয়েছে।');
+            log('💀 <b>FROX</b> এখন নতুন prompt দিয়ে রেডি।');
+        };
+        window.resetPrompt = function() {
+            promptTextarea.value = DEFAULT_SYSTEM_PROMPT;
+            systemPrompt = DEFAULT_SYSTEM_PROMPT;
+            localStorage.setItem('frox_system_prompt', DEFAULT_SYSTEM_PROMPT);
+            promptModal.style.display = 'none';
+            resetHistory();
+            chatBox.innerHTML = '';
+            log('↺ <b>DEFAULT PROMPT</b> রিস্টোর হয়েছে।');
+            log('💀 <b>FROX</b> রেডি।');
         };
 
-        window.changeKey = function() {
+        // ============ API KEY ============
+        window.openKeyModal = function() {
             apiKeyInput.value = API_KEY;
-            apiModal.style.display = 'flex';
+            keyModal.style.display = 'flex';
             apiKeyInput.focus();
         };
-
-        window.useLocal = function() {
-            log('⚠️ API key ছাড়া কাজ করবে না! key দে...', 'error-msg');
+        window.closeKeyModal = function() {
+            keyModal.style.display = 'none';
+        };
+        window.saveApiKey = function() {
+            const key = apiKeyInput.value.trim();
+            if (!key) return;
+            API_KEY = key;
+            localStorage.setItem('frox_api_key', key);
+            keyModal.style.display = 'none';
+            resetHistory();
+            chatBox.innerHTML = '';
+            log('🔑 <b>KEY SAVED!</b>');
+            log('💀 <b>FROX</b> রেডি — চ্যাট করো...');
         };
 
+        // ============ SEND MESSAGE ============
         window.sendMsg = async function() {
-            if (!checkApiKey()) return;
             const text = userInput.value.trim();
             if (!text) return;
+            if (!API_KEY) {
+                log('⚠️ API KEY missing! 🔑 KEY বাটনে ক্লিক করো', 'system-msg');
+                openKeyModal();
+                return;
+            }
 
             userInput.value = '';
             sendBtn.disabled = true;
-            statusDot.className = 'status-dot';
-            statusDot.style.background = 'var(--orange)';
+            setStatus(false);
 
-            // Show user msg
+            // User msg
             const uDiv = document.createElement('div');
             uDiv.className = 'msg user';
-            uDiv.innerHTML = '<div class="sender">[YOU]</div>' + text.replace(/</g, '&lt;').replace(/\n/g, '<br>');
+            uDiv.innerHTML = '<div class="sender">[YOU]</div>' + escapeHTML(text);
             chatBox.appendChild(uDiv);
             history.push({ role: "user", parts: [{ text: text }] });
 
-            // Typing
+            // Typing indicator
             const tDiv = document.createElement('div');
             tDiv.className = 'msg ai';
             tDiv.id = 'typing';
-            tDiv.innerHTML = '<span style="color:#00ffff;">⏳ চিন্তা করছে...</span>';
+            tDiv.innerHTML = '<span style="color:#808080;">▌</span>';
             chatBox.appendChild(tDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -497,65 +619,93 @@
                 );
 
                 const data = await res.json();
-
                 if (!res.ok || data.error) {
                     throw new Error(data.error?.message || `HTTP ${res.status}`);
                 }
 
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'কিছু পেলাম না...';
-
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '[NULL RESPONSE]';
                 document.getElementById('typing')?.remove();
                 history.push({ role: "model", parts: [{ text: reply }] });
 
                 const aDiv = document.createElement('div');
                 aDiv.className = 'msg ai';
-                const fmt = reply
-                    .replace(/```(\w*)\n([\s\S]*?)```/g,
-                        '<pre style="background:#000;border:1px solid #333;padding:8px;border-radius:3px;overflow-x:auto;font-size:10px;color:#0f0;">$2</pre>'
-                        )
-                    .replace(/`([^`]+)`/g,
-                        '<code style="background:rgba(0,0,0,0.4);padding:1px 5px;border-radius:2px;color:#ff0;">$1</code>')
-                    .replace(/\n/g, '<br>');
-                aDiv.innerHTML = '<div class="sender">[FEEK]</div>' + fmt;
+                const formatted = formatReply(reply);
+                aDiv.innerHTML = '<div class="sender">[FROX]</div>' + formatted;
                 chatBox.appendChild(aDiv);
 
-                // Keep history manageable
-                if (history.length > 30) {
-                    history = [history[0], ...history.slice(-28)];
+                if (history.length > 40) {
+                    const sysMsg = history[0];
+                    history = [sysMsg, ...history.slice(-38)];
                 }
-
             } catch (err) {
                 document.getElementById('typing')?.remove();
                 const errMsg = err.message || String(err);
-                logError('API এরর: ' + errMsg.replace(/</g, '&lt;'));
-                if (errMsg.includes('API key')) {
-                    logError('API key ভুল! আবার চেক করো...');
-                    API_KEY = '';
-                    localStorage.removeItem('gemini_api_key');
-                    apiModal.style.display = 'flex';
+                log('✕ ERROR: ' + escapeHTML(errMsg), 'system-msg');
+                if (errMsg.includes('API key') || errMsg.includes('403') || errMsg.includes('invalid')) {
+                    log('🔑 API key invalid! Update koro...', 'system-msg');
                 }
                 history.pop();
             }
 
             sendBtn.disabled = false;
-            statusDot.className = 'status-dot online';
-            statusDot.style.background = '';
+            setStatus(true);
             chatBox.scrollTop = chatBox.scrollHeight;
             userInput.focus();
         };
 
-        // Init
-        if (API_KEY) {
-            apiModal.style.display = 'none';
-            logSuccess('🔑 API key found! চ্যাট শুরু করো... 💀🚀');
-            userInput.focus();
-        } else {
-            apiModal.style.display = 'flex';
-            apiKeyInput.focus();
+        function escapeHTML(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
         }
-        log('💀 <b>FEEK_TERMINAL</b> — Gemini API');
-        log('⚡ <b>মডেল:</b> Gemini 2.0 Flash (ফ্রি)');
-        log('🔑 API key দিলেই ইনস্ট্যান্ট চ্যাট শুরু!');
+
+        function formatReply(text) {
+            return text
+                .replace(/```(\w*)\n([\s\S]*?)```/g,
+                    '<pre>$2</pre>')
+                .replace(/`([^`]+)`/g,
+                    '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // ============ INIT ============
+        function init() {
+            resetHistory();
+            chatBox.innerHTML = '';
+            log('🖤 <b>FROX — THE HACKER</b>');
+            log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
+            log('⚡ <b>MODEL:</b> Gemini 2.0 Flash');
+            log('🔑 <b>KEY:</b> ' + (API_KEY ? '<span style="color:#fff;">LOADED ✓</span>' :
+                '<span style="color:#808080;">MISSING</span>'));
+            log('⚙ <b>PROMPT:</b> ' + (systemPrompt === DEFAULT_SYSTEM_PROMPT ? 'DEFAULT' : 'CUSTOM'));
+            log('📡 <b>STATUS:</b> <span style="color:#fff;">ONLINE</span>');
+            log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
+            log('💀 কমান্ড লিখো ব্রো...');
+            userInput.focus();
+            setStatus(true);
+        }
+
+        init();
+
+        // Close modals on overlay click
+        promptModal.addEventListener('click', function(e) {
+            if (e.target === promptModal) closePromptEditor();
+        });
+        keyModal.addEventListener('click', function(e) {
+            if (e.target === keyModal) closeKeyModal();
+        });
+
+        // Keyboard shortcut: Ctrl+P for prompt editor
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                openPromptEditor();
+            }
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                openKeyModal();
+            }
+        });
     </script>
 </body>
 </html>
