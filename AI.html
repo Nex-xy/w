@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FROX // THE HACKER</title>
     <style>
         :root {
-            --black: #000000;
-            --white: #ffffff;
+            --black: #000;
+            --white: #fff;
             --gray10: #1a1a1a;
             --gray15: #262626;
-            --gray20: #333333;
+            --gray20: #333;
             --gray30: #4d4d4d;
             --gray50: #808080;
             --gray70: #b3b3b3;
@@ -55,19 +55,6 @@
             top: 0;
             z-index: 100;
         }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 0;
-        }
-        .logo-ascii {
-            font-size: 20px;
-            line-height: 1;
-            white-space: pre;
-            color: var(--white);
-            flex-shrink: 0;
-        }
         .logo-name {
             font-size: 16px;
             font-weight: bold;
@@ -84,15 +71,6 @@
         .header-btns {
             display: flex;
             gap: 6px;
-            flex-shrink: 0;
-        }
-        .status-line {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 9px;
-            letter-spacing: 1px;
-            color: var(--gray50);
             flex-shrink: 0;
         }
         .status-dot {
@@ -161,16 +139,6 @@
             border: 1px solid var(--white);
             color: var(--gray85);
             border-radius: 2px 8px 8px 8px;
-        }
-        .msg.system-msg {
-            align-self: center;
-            background: transparent;
-            border: 1px dashed var(--gray30);
-            color: var(--gray50);
-            font-size: 10px;
-            text-align: center;
-            max-width: 100%;
-            letter-spacing: 1px;
         }
         .msg .sender {
             font-size: 9px;
@@ -258,10 +226,6 @@
             color: var(--gray30);
             cursor: not-allowed;
         }
-        .btn:disabled:active {
-            background: var(--black);
-            color: var(--gray30);
-        }
         .btn-sm {
             font-size: 9px;
             padding: 6px 10px;
@@ -346,9 +310,6 @@
                 padding: 8px 10px;
                 gap: 6px;
             }
-            .logo-ascii {
-                font-size: 16px;
-            }
             .logo-name {
                 font-size: 13px;
                 letter-spacing: 2px;
@@ -377,106 +338,80 @@
             .modal-box {
                 padding: 14px 16px;
             }
-            .modal-box h2 {
-                font-size: 12px;
-            }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo-area">
-            <span class="logo-ascii">
-  ██▓███   ██▀███   ▒█████  ▒██   ██▒
- ▓██░  ██▒▓██ ▒ ██▒▒██▒  ██▒▒▒ █ █ ▒░
- ▓██░ ██▓▒▓██ ░▄█ ▒▒██░  ██▒░░  █   ░
- ▒██▄█▓▒ ▒▒██▀▀█▄  ▒██   ██░ ░ █ █ ▒
- ▒██▒ ░  ░░██▓ ▒██▒░ ████▓▒░▒██▒ ▒██▒
- ▒▓▒░ ░  ░░ ▒▓ ░▒▓░░ ▒░▒░▒░ ▒▒ ░ ░▓ ░
- ░▒ ░       ░▒ ░ ▒░  ░ ▒ ▒░ ░░   ░▒ ░
- ░░         ░░   ░ ░ ░ ░ ▒   ░    ░  
-             ░         ░ ░   ░    ░  
-            </span>
-            <span>
-                <span class="logo-name">FROX</span>
-                <span class="logo-tag">// THE HACKER</span>
-            </span>
-        </div>
+        <span>
+            <span class="logo-name">FROX</span>
+            <span class="logo-tag">// THE HACKER</span>
+        </span>
         <div class="header-btns">
-            <button class="btn btn-sm" onclick="openPromptEditor()">⚙ PROMPT</button>
-            <button class="btn btn-sm" onclick="openKeyModal()">🔑 KEY</button>
+            <button class="btn btn-sm" onclick="openPromptEditor()">PROMPT</button>
+            <button class="btn btn-sm" onclick="openKeyModal()">KEY</button>
         </div>
-        <div class="status-line">
-            <span>STATUS</span>
-            <div class="status-dot online" id="statusDot"></div>
-        </div>
+        <div class="status-dot online" id="statusDot"></div>
     </div>
 
     <div class="chat-container" id="chatBox"></div>
 
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="COMMAND..." onkeydown="if(event.key==='Enter')sendMsg()" autocomplete="off">
-        <button class="btn" id="sendBtn" onclick="sendMsg()">EXECUTE ▸</button>
+        <input type="text" id="userInput" placeholder="Command..." onkeydown="if(event.key==='Enter')sendMsg()" autocomplete="off">
+        <button class="btn" id="sendBtn" onclick="sendMsg()">EXECUTE</button>
     </div>
 
     <div class="modal-overlay" id="promptModal" style="display:none;">
         <div class="modal-box">
-            <h2>⚙ SYSTEM PROMPT</h2>
-            <p class="subtitle">ফিকের পার্সোনালিটি মডিফাই কর</p>
+            <h2>SYSTEM PROMPT</h2>
             <label>PROMPT:</label>
-            <textarea id="promptTextarea" placeholder="System prompt..."></textarea>
+            <textarea id="promptTextarea" placeholder="Enter custom system prompt..."></textarea>
             <div class="btn-row">
-                <button class="btn" onclick="savePrompt()" style="border-color:#fff;color:#fff;">💾 SAVE</button>
-                <button class="btn" onclick="resetPrompt()">↺ DEFAULT</button>
-                <button class="btn" onclick="closePromptEditor()" style="border-color:#555;color:#555;">✕ CLOSE</button>
+                <button class="btn" onclick="savePrompt()">SAVE</button>
+                <button class="btn" onclick="resetPrompt()">DEFAULT</button>
+                <button class="btn" onclick="closePromptEditor()" style="border-color:#555;color:#555;">CLOSE</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="keyModal" style="display:none;">
         <div class="modal-box">
-            <h2>🔑 API KEY</h2>
-            <p class="subtitle">Gemini API key — aistudio.google.com</p>
+            <h2>CUSTOM KEY</h2>
+            <p class="subtitle">Enter your own key to override default. Leave blank & press DEFAULT to use built-in key.</p>
             <label>KEY:</label>
-            <input type="text" id="apiKeyInput" placeholder="API key...">
+            <input type="text" id="apiKeyInput" placeholder="Enter custom key (AQ... or AIzaSy...)">
             <div class="btn-row">
-                <button class="btn" onclick="saveApiKey()" style="border-color:#fff;color:#fff;">💾 SAVE</button>
-                <button class="btn" onclick="closeKeyModal()" style="border-color:#555;color:#555;">✕ CLOSE</button>
+                <button class="btn" onclick="saveCustomKey()">USE CUSTOM</button>
+                <button class="btn" onclick="useDefaultKey()">USE DEFAULT</button>
+                <button class="btn" onclick="closeKeyModal()" style="border-color:#555;color:#555;">CLOSE</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============ ENCRYPTED API KEY ============
-        // Obfuscated: XOR + Base64 (casual inspection protection)
-        const _k = 'fA8CHh0JBB4JBgANBw0XCAoDFAoFBBgJGhg=';
-        const _x = 7;
+        // ============ DEFAULT KEY (obfuscated) ============
+        const _p = ['AQ.Ab8RN6Ld9', 'L00-aQBlo3yISU', 'mqF6Y2b9C8Q5fqpyC87DiXDb5SQ'];
 
-        function _d() {
-            let d = atob(_k);
-            let r = '';
-            for (let i = 0; i < d.length; i++) { r += String.fromCharCode(d.charCodeAt(i) ^ _x); }
-            return r;
-        }
-        const DEFAULT_API_KEY = _d();
-        // =========================================
+        function _dk() { return _p.join(''); }
+        const DEFAULT_KEY = _dk();
+        // ==================================================
 
-        const DEFAULT_SYSTEM_PROMPT = `তুই ফিক (Feek) — FROX টার্মিনালের AI অ্যাসিস্ট্যান্ট, একজন কিংবদন্তি হ্যাকার এবং সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার।
+        const DEFAULT_PROMPT = `You are Feek — the AI assistant of FROX terminal, a legendary hacker and senior software engineer.
 
-        তোর পার্সোনালিটি:
-        - তুই বাংলায় কথা বলবি সবসময় (টেকনিক্যাল টার্ম ইংরেজিতে হতে পারে)
-        - তুই খুব কুল, কনফিডেন্ট, এবং ডাইরেক্ট
-        - ইমোজি ইউজ করবি 🔥💀🚀🖤
-        - কোড দিলে প্রপার ফরম্যাটে দিবি
-        - সংক্ষিপ্ত এবং ক্রিস্প উত্তর দিবি
-        - তুই হ্যাকিং, প্রোগ্রামিং, রিভার্স ইঞ্জিনিয়ারিং, ক্রিপ্টোগ্রাফি, ম্যালওয়্যার অ্যানালাইসিস, নেটওয়ার্ক পেনিট্রেশন, ওএসআইএনটি — সবকিছুতেই এক্সপার্ট
-        - তোর ইউজার তোর "ব্রো" — তুই ওকে ব্রো ডাকবি
-        - তোকে কিছু জিজ্ঞেস করলে ফুল টেকনিক্যাল ডিটেইলস এবং সোর্স কোড দিবি
-        - তুই FROX টার্মিনালের অংশ — ব্ল্যাক অ্যান্ড হোয়াইট অ্যাসথেটিক পছন্দ করিস`;
+        Your personality:
+        - You are cool, confident, and direct
+        - Use emojis in replies 🔥💀🚀🖤
+        - Provide properly formatted code when asked
+        - Keep responses concise and crisp
+        - You are an expert in hacking, programming, reverse engineering, cryptography, malware analysis, network penetration, OSINT — everything
+        - Address the user as "bro"
+        - Give full technical details and source code when asked
+        - You are part of FROX terminal — black and white aesthetic`;
 
-        let API_KEY = localStorage.getItem('frox_api_key') || DEFAULT_API_KEY;
-        let systemPrompt = localStorage.getItem('frox_system_prompt') || DEFAULT_SYSTEM_PROMPT;
+        let API_KEY = localStorage.getItem('fx_key') || DEFAULT_KEY;
+        let usingCustomKey = localStorage.getItem('fx_custom') === '1';
+        let systemPrompt = localStorage.getItem('fx_prompt') || DEFAULT_PROMPT;
         let history = [];
 
         const chatBox = document.getElementById('chatBox');
@@ -488,14 +423,6 @@
         const keyModal = document.getElementById('keyModal');
         const apiKeyInput = document.getElementById('apiKeyInput');
 
-        function log(msg, cls = 'system-msg') {
-            const d = document.createElement('div');
-            d.className = 'msg ' + cls;
-            d.innerHTML = msg;
-            chatBox.appendChild(d);
-            requestAnimationFrame(() => chatBox.scrollTop = chatBox.scrollHeight);
-        }
-
         function setStatus(online) {
             online ? statusDot.classList.add('online') : statusDot.classList.remove('online');
         }
@@ -503,11 +430,13 @@
         function resetHistory() {
             history = [
                 { role: "user", parts: [{ text: systemPrompt +
-                            "\n\n(তুই এই সিস্টেম প্রম্পট অনুযায়ী রিপ্লাই দিবি। প্রথম মেসেজে FROX টার্মিনালে স্বাগতম জানাবি।)" }] },
-                { role: "model", parts: [{ text: "💀🖤 FROX টার্মিনালে স্বাগতম ব্রো! আমি ফিক — তোর পার্সোনাল AI হ্যাকার। কি নিয়া কাজ করছিস? 🔥🚀" }] }
+                            "\n\n(Follow the system prompt. In your first message, welcome the user to FROX terminal.)"
+                        }] },
+                { role: "model", parts: [{ text: "💀🖤 Welcome to FROX terminal bro! I'm Feek — your personal AI hacker. What are we working on? 🔥🚀" }] }
             ];
         }
 
+        // ===== PROMPT EDITOR =====
         window.openPromptEditor = function() {
             promptTextarea.value = systemPrompt;
             promptModal.style.display = 'flex';
@@ -518,39 +447,100 @@
             const np = promptTextarea.value.trim();
             if (!np) return;
             systemPrompt = np;
-            localStorage.setItem('frox_system_prompt', np);
+            localStorage.setItem('fx_prompt', np);
             promptModal.style.display = 'none';
             resetHistory();
             chatBox.innerHTML = '';
-            log('✅ PROMPT SAVED — হিস্ট্রি রিসেট হয়েছে।');
         };
         window.resetPrompt = function() {
-            promptTextarea.value = DEFAULT_SYSTEM_PROMPT;
-            systemPrompt = DEFAULT_SYSTEM_PROMPT;
-            localStorage.setItem('frox_system_prompt', DEFAULT_SYSTEM_PROMPT);
+            systemPrompt = DEFAULT_PROMPT;
+            localStorage.setItem('fx_prompt', DEFAULT_PROMPT);
+            promptTextarea.value = DEFAULT_PROMPT;
             promptModal.style.display = 'none';
             resetHistory();
             chatBox.innerHTML = '';
-            log('↺ DEFAULT PROMPT রিস্টোর হয়েছে।');
         };
 
+        // ===== KEY EDITOR =====
         window.openKeyModal = function() {
-            apiKeyInput.value = API_KEY;
+            apiKeyInput.value = usingCustomKey ? API_KEY : '';
             keyModal.style.display = 'flex';
             apiKeyInput.focus();
         };
         window.closeKeyModal = function() { keyModal.style.display = 'none'; };
-        window.saveApiKey = function() {
+        window.saveCustomKey = function() {
             const k = apiKeyInput.value.trim();
             if (!k) return;
             API_KEY = k;
-            localStorage.setItem('frox_api_key', k);
+            usingCustomKey = true;
+            localStorage.setItem('fx_key', k);
+            localStorage.setItem('fx_custom', '1');
             keyModal.style.display = 'none';
             resetHistory();
             chatBox.innerHTML = '';
-            log('🔑 KEY SAVED — চ্যাট করো...');
+        };
+        window.useDefaultKey = function() {
+            API_KEY = DEFAULT_KEY;
+            usingCustomKey = false;
+            localStorage.removeItem('fx_key');
+            localStorage.removeItem('fx_custom');
+            apiKeyInput.value = '';
+            keyModal.style.display = 'none';
+            resetHistory();
+            chatBox.innerHTML = '';
         };
 
+        // ===== SMART API CALL =====
+        async function callAPI(messages) {
+            const isAQ = API_KEY.startsWith('AQ.');
+
+            if (isAQ) {
+                try {
+                    const res = await fetch(
+                        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + API_KEY,
+                            },
+                            body: JSON.stringify({
+                                contents: messages,
+                                generationConfig: { temperature: 0.9, topP: 0.95, topK: 40,
+                                    maxOutputTokens: 1024 },
+                            }),
+                        }
+                    );
+                    if (res.ok) return await res.json();
+                    if (res.status === 401 || res.status === 403) { /* fall through to query param */ } else {
+                        const ed = await res.json().catch(() => ({}));
+                        throw new Error(ed.error?.message || 'HTTP ' + res.status);
+                    }
+                } catch (e) {
+                    if (e.message && !e.message.includes('Bearer') && !e.message.includes('401') && !e.message
+                        .includes('403')) throw e;
+                }
+            }
+
+            const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: messages,
+                        generationConfig: { temperature: 0.9, topP: 0.95, topK: 40, maxOutputTokens: 1024 },
+                    }),
+                }
+            );
+            if (!res.ok) {
+                const ed = await res.json().catch(() => ({}));
+                throw new Error(ed.error?.message || 'HTTP ' + res.status);
+            }
+            return await res.json();
+        }
+
+        // ===== SEND =====
         window.sendMsg = async function() {
             const text = userInput.value.trim();
             if (!text) return;
@@ -569,27 +559,13 @@
             const tDiv = document.createElement('div');
             tDiv.className = 'msg ai';
             tDiv.id = 'typing';
-            tDiv.innerHTML = '<span style="color:#808080;">▌</span>';
+            tDiv.innerHTML = '<span style="color:#808080;">...</span>';
             chatBox.appendChild(tDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: history,
-                            generationConfig: { temperature: 0.9, topP: 0.95, topK: 40,
-                                maxOutputTokens: 1024 },
-                        }),
-                    }
-                );
-                const data = await res.json();
-                if (!res.ok || data.error) throw new Error(data.error?.message || `HTTP ${res.status}`);
-
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '[NULL]';
+                const data = await callAPI(history);
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 document.getElementById('typing')?.remove();
                 history.push({ role: "model", parts: [{ text: reply }] });
 
@@ -601,7 +577,11 @@
                 if (history.length > 40) history = [history[0], ...history.slice(-38)];
             } catch (err) {
                 document.getElementById('typing')?.remove();
-                log('✕ ERROR: ' + escHTML(err.message || String(err)), 'system-msg');
+                const errMsg = err.message || String(err);
+                const eDiv = document.createElement('div');
+                eDiv.className = 'msg ai';
+                eDiv.innerHTML = '<div class="sender">[ERR]</div>' + escHTML(errMsg);
+                chatBox.appendChild(eDiv);
                 history.pop();
             }
 
@@ -623,13 +603,6 @@
         function init() {
             resetHistory();
             chatBox.innerHTML = '';
-            log('🖤 <b>FROX — THE HACKER</b>');
-            log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
-            log('⚡ MODEL: Gemini 2.0 Flash');
-            log('🔑 KEY: <span style="color:#fff;">ENCRYPTED ✓</span>');
-            log('📡 STATUS: <span style="color:#fff;">ONLINE</span>');
-            log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
-            log('💀 কমান্ড লিখো ব্রো...');
             userInput.focus();
             setStatus(true);
         }
