@@ -10,7 +10,6 @@
             --white: #fff;
             --gray10: #1a1a1a;
             --gray15: #262626;
-            --gray20: #333;
             --gray30: #4d4d4d;
             --gray50: #808080;
             --gray70: #b3b3b3;
@@ -45,21 +44,21 @@
         .header {
             background: var(--black);
             border-bottom: 2px solid var(--white);
-            padding: 10px 16px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
+            gap: 8px;
             flex-shrink: 0;
             position: sticky;
             top: 0;
             z-index: 100;
+            flex-wrap: wrap;
         }
         .logo-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             letter-spacing: 3px;
-            color: var(--white);
             text-transform: uppercase;
         }
         .logo-tag {
@@ -67,6 +66,22 @@
             letter-spacing: 2px;
             color: var(--gray50);
             display: block;
+        }
+        .model-select {
+            background: var(--black);
+            border: 1px solid var(--white);
+            color: var(--white);
+            padding: 6px 8px;
+            font-family: var(--font);
+            font-size: 10px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            outline: none;
+            border-radius: 2px;
+        }
+        .model-select option {
+            background: var(--black);
+            color: var(--white);
         }
         .header-btns {
             display: flex;
@@ -78,7 +93,6 @@
             height: 8px;
             border: 1px solid var(--white);
             flex-shrink: 0;
-            transition: all 0.3s;
         }
         .status-dot.online {
             background: var(--white);
@@ -205,7 +219,7 @@
             background: var(--black);
             border: 1px solid var(--white);
             color: var(--white);
-            padding: 10px 16px;
+            padding: 10px 14px;
             border-radius: 2px;
             cursor: pointer;
             font-family: var(--font);
@@ -228,7 +242,7 @@
         }
         .btn-sm {
             font-size: 9px;
-            padding: 6px 10px;
+            padding: 5px 8px;
             letter-spacing: 1px;
         }
         .modal-overlay {
@@ -259,12 +273,6 @@
             margin-bottom: 6px;
             color: var(--white);
         }
-        .modal-box .subtitle {
-            font-size: 9px;
-            color: var(--gray50);
-            letter-spacing: 1px;
-            margin-bottom: 14px;
-        }
         .modal-box label {
             font-size: 10px;
             letter-spacing: 2px;
@@ -273,8 +281,7 @@
             margin-bottom: 4px;
             text-transform: uppercase;
         }
-        .modal-box textarea,
-        .modal-box input[type="text"] {
+        .modal-box textarea {
             width: 100%;
             background: var(--gray10);
             border: 1px solid var(--gray50);
@@ -286,15 +293,11 @@
             outline: none;
             resize: vertical;
             margin-bottom: 12px;
-            transition: all 0.3s;
-        }
-        .modal-box textarea:focus,
-        .modal-box input:focus {
-            border-color: var(--white);
-        }
-        .modal-box textarea {
             min-height: 120px;
             line-height: 1.5;
+        }
+        .modal-box textarea:focus {
+            border-color: var(--white);
         }
         .modal-box .btn-row {
             display: flex;
@@ -307,15 +310,16 @@
         }
         @media (max-width: 480px) {
             .header {
-                padding: 8px 10px;
-                gap: 6px;
+                padding: 8px;
+                gap: 4px;
             }
             .logo-name {
-                font-size: 13px;
+                font-size: 12px;
                 letter-spacing: 2px;
             }
-            .logo-tag {
-                font-size: 7px;
+            .model-select {
+                font-size: 9px;
+                padding: 4px 6px;
             }
             .msg {
                 max-width: 95%;
@@ -335,9 +339,6 @@
                 font-size: 10px;
                 letter-spacing: 1px;
             }
-            .modal-box {
-                padding: 14px 16px;
-            }
         }
     </style>
 </head>
@@ -348,6 +349,12 @@
             <span class="logo-name">FROX</span>
             <span class="logo-tag">// THE HACKER</span>
         </span>
+        <select class="model-select" id="modelSelect" onchange="switchModel()">
+            <option value="pollinations">Pollinations [Free]</option>
+            <option value="duckduckgo">DuckDuckGo [Free]</option>
+            <option value="blackbox">Blackbox [Free]</option>
+            <option value="gemini">Gemini [Key]</option>
+        </select>
         <div class="header-btns">
             <button class="btn btn-sm" onclick="openPromptEditor()">PROMPT</button>
             <button class="btn btn-sm" onclick="openKeyModal()">KEY</button>
@@ -377,25 +384,23 @@
 
     <div class="modal-overlay" id="keyModal" style="display:none;">
         <div class="modal-box">
-            <h2>CUSTOM KEY</h2>
-            <p class="subtitle">Enter your own key to override default. Leave blank & press DEFAULT to use built-in key.</p>
+            <h2>GEMINI KEY</h2>
+            <p style="font-size:9px;color:var(--gray50);margin-bottom:10px;">Only for Gemini model. Other 3 models are FREE and keyless.</p>
             <label>KEY:</label>
-            <input type="text" id="apiKeyInput" placeholder="Enter custom key (AQ... or AIzaSy...)">
+            <input type="text" id="apiKeyInput" placeholder="AIzaSy... or AQ...">
             <div class="btn-row">
-                <button class="btn" onclick="saveCustomKey()">USE CUSTOM</button>
-                <button class="btn" onclick="useDefaultKey()">USE DEFAULT</button>
+                <button class="btn" onclick="saveCustomKey()">SAVE</button>
                 <button class="btn" onclick="closeKeyModal()" style="border-color:#555;color:#555;">CLOSE</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============ DEFAULT KEY (obfuscated) ============
+        // ===== DEFAULT GEMINI KEY (obfuscated) =====
         const _p = ['AQ.Ab8RN6Ld9', 'L00-aQBlo3yISU', 'mqF6Y2b9C8Q5fqpyC87DiXDb5SQ'];
 
         function _dk() { return _p.join(''); }
-        const DEFAULT_KEY = _dk();
-        // ==================================================
+        const DEFAULT_GEMINI_KEY = _dk();
 
         const DEFAULT_PROMPT = `You are Feek — the AI assistant of FROX terminal, a legendary hacker and senior software engineer.
 
@@ -404,13 +409,13 @@
         - Use emojis in replies 🔥💀🚀🖤
         - Provide properly formatted code when asked
         - Keep responses concise and crisp
-        - You are an expert in hacking, programming, reverse engineering, cryptography, malware analysis, network penetration, OSINT — everything
+        - You are an expert in hacking, programming, reverse engineering, cryptography, malware analysis, network penetration, OSINT
         - Address the user as "bro"
         - Give full technical details and source code when asked
         - You are part of FROX terminal — black and white aesthetic`;
 
-        let API_KEY = localStorage.getItem('fx_key') || DEFAULT_KEY;
-        let usingCustomKey = localStorage.getItem('fx_custom') === '1';
+        let currentModel = localStorage.getItem('fx_model') || 'pollinations';
+        let geminiKey = localStorage.getItem('fx_gkey') || DEFAULT_GEMINI_KEY;
         let systemPrompt = localStorage.getItem('fx_prompt') || DEFAULT_PROMPT;
         let history = [];
 
@@ -418,25 +423,19 @@
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const statusDot = document.getElementById('statusDot');
+        const modelSelect = document.getElementById('modelSelect');
         const promptModal = document.getElementById('promptModal');
         const promptTextarea = document.getElementById('promptTextarea');
         const keyModal = document.getElementById('keyModal');
         const apiKeyInput = document.getElementById('apiKeyInput');
 
-        function setStatus(online) {
-            online ? statusDot.classList.add('online') : statusDot.classList.remove('online');
-        }
+        function setStatus(o) { o ? statusDot.classList.add('online') : statusDot.classList.remove('online'); }
 
         function resetHistory() {
-            history = [
-                { role: "user", parts: [{ text: systemPrompt +
-                            "\n\n(Follow the system prompt. In your first message, welcome the user to FROX terminal.)"
-                        }] },
-                { role: "model", parts: [{ text: "💀🖤 Welcome to FROX terminal bro! I'm Feek — your personal AI hacker. What are we working on? 🔥🚀" }] }
-            ];
+            history = [{ role: "user", parts: [{ text: systemPrompt }] }];
         }
 
-        // ===== PROMPT EDITOR =====
+        // ===== PROMPT =====
         window.openPromptEditor = function() {
             promptTextarea.value = systemPrompt;
             promptModal.style.display = 'flex';
@@ -461,9 +460,9 @@
             chatBox.innerHTML = '';
         };
 
-        // ===== KEY EDITOR =====
+        // ===== KEY =====
         window.openKeyModal = function() {
-            apiKeyInput.value = usingCustomKey ? API_KEY : '';
+            apiKeyInput.value = geminiKey;
             keyModal.style.display = 'flex';
             apiKeyInput.focus();
         };
@@ -471,81 +470,153 @@
         window.saveCustomKey = function() {
             const k = apiKeyInput.value.trim();
             if (!k) return;
-            API_KEY = k;
-            usingCustomKey = true;
-            localStorage.setItem('fx_key', k);
-            localStorage.setItem('fx_custom', '1');
+            geminiKey = k;
+            localStorage.setItem('fx_gkey', k);
             keyModal.style.display = 'none';
-            resetHistory();
-            chatBox.innerHTML = '';
-        };
-        window.useDefaultKey = function() {
-            API_KEY = DEFAULT_KEY;
-            usingCustomKey = false;
-            localStorage.removeItem('fx_key');
-            localStorage.removeItem('fx_custom');
-            apiKeyInput.value = '';
-            keyModal.style.display = 'none';
-            resetHistory();
-            chatBox.innerHTML = '';
         };
 
-        // ===== SMART API CALL =====
-        async function callAPI(messages) {
-            const isAQ = API_KEY.startsWith('AQ.');
+        // ===== MODEL SWITCH =====
+        window.switchModel = function() {
+            currentModel = modelSelect.value;
+            localStorage.setItem('fx_model', currentModel);
+            resetHistory();
+            chatBox.innerHTML = '';
+            if (currentModel === 'gemini') {
+                addSysMsg('Switched to Gemini. Using saved key.');
+            } else {
+                addSysMsg('Switched to ' + modelSelect.options[modelSelect.selectedIndex].text +
+                    '. No key needed.');
+            }
+        };
 
-            if (isAQ) {
+        function addSysMsg(text) {
+            const d = document.createElement('div');
+            d.style.cssText =
+                'align-self:center;color:#808080;font-size:10px;text-align:center;padding:4px;letter-spacing:1px;';
+            d.textContent = text;
+            chatBox.appendChild(d);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // ===== API CALLS =====
+        async function callPollinations(messages) {
+            const prompt = messages.map(m => m.role + ': ' + m.parts[0].text).join('\n');
+            const res = await fetch('https://text.pollinations.ai/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: messages.map(m => ({ role: m.role === 'model' ? 'assistant' : m.role,
+                        content: m.parts[0].text })),
+                    model: 'openai',
+                    temperature: 0.9,
+                    max_tokens: 1024,
+                }),
+            });
+            if (!res.ok) throw new Error('Pollinations: ' + res.status);
+            const data = await res.json();
+            return data.choices?.[0]?.message?.content || data.text || JSON.stringify(data);
+        }
+
+        async function callDuckDuckGo(messages) {
+            const lastMsg = messages[messages.length - 1].parts[0].text;
+            const fullContext = messages.map(m => m.role + ': ' + m.parts[0].text).join('\n');
+            const res = await fetch('https://duckduckgo.com/duckchat/v1/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...messages.map(m => ({ role: m.role === 'model' ? 'assistant' : m.role,
+                            content: m.parts[0].text })),
+                    ],
+                }),
+            });
+            if (!res.ok) throw new Error('DuckDuckGo: ' + res.status);
+            const text = await res.text();
+            const lines = text.split('\n').filter(l => l.startsWith('data: '));
+            let reply = '';
+            for (const line of lines) {
                 try {
-                    const res = await fetch(
-                        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + API_KEY,
-                            },
-                            body: JSON.stringify({
-                                contents: messages,
-                                generationConfig: { temperature: 0.9, topP: 0.95, topK: 40,
-                                    maxOutputTokens: 1024 },
-                            }),
-                        }
-                    );
-                    if (res.ok) return await res.json();
-                    if (res.status === 401 || res.status === 403) { /* fall through to query param */ } else {
-                        const ed = await res.json().catch(() => ({}));
-                        throw new Error(ed.error?.message || 'HTTP ' + res.status);
+                    const j = JSON.parse(line.slice(6));
+                    if (j.message) reply += j.message;
+                } catch (e) {}
+            }
+            return reply || text;
+        }
+
+        async function callBlackbox(messages) {
+            const lastMsg = messages[messages.length - 1].parts[0].text;
+            const res = await fetch('https://api.blackbox.ai/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...messages.map(m => ({ role: m.role === 'model' ? 'assistant' : m.role,
+                            content: m.parts[0].text })),
+                    ],
+                    model: 'deepseek-ai/DeepSeek-V3',
+                    max_tokens: 1024,
+                }),
+            });
+            if (!res.ok) throw new Error('Blackbox: ' + res.status);
+            const data = await res.json();
+            return data.choices?.[0]?.message?.content || data.response || JSON.stringify(data);
+        }
+
+        async function callGemini(messages) {
+            const isAQ = geminiKey.startsWith('AQ.');
+            if (isAQ) {
+                const res = await fetch(
+                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
+                                geminiKey },
+                        body: JSON.stringify({ contents: messages, generationConfig: { temperature: 0.9,
+                                topP: 0.95, topK: 40, maxOutputTokens: 1024 } }),
                     }
-                } catch (e) {
-                    if (e.message && !e.message.includes('Bearer') && !e.message.includes('401') && !e.message
-                        .includes('403')) throw e;
+                );
+                if (res.ok) {
+                    const d = await res.json();
+                    return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 }
             }
-
             const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: messages,
-                        generationConfig: { temperature: 0.9, topP: 0.95, topK: 40, maxOutputTokens: 1024 },
-                    }),
+                    body: JSON.stringify({ contents: messages, generationConfig: { temperature: 0.9, topP: 0.95,
+                            topK: 40, maxOutputTokens: 1024 } }),
                 }
             );
-            if (!res.ok) {
-                const ed = await res.json().catch(() => ({}));
-                throw new Error(ed.error?.message || 'HTTP ' + res.status);
+            if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error?.message ||
+                    'HTTP ' + res.status); }
+            const d = await res.json();
+            return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function callAI(messages) {
+            switch (currentModel) {
+                case 'pollinations':
+                    return await callPollinations(messages);
+                case 'duckduckgo':
+                    return await callDuckDuckGo(messages);
+                case 'blackbox':
+                    return await callBlackbox(messages);
+                case 'gemini':
+                    return await callGemini(messages);
+                default:
+                    return await callPollinations(messages);
             }
-            return await res.json();
         }
 
         // ===== SEND =====
         window.sendMsg = async function() {
             const text = userInput.value.trim();
             if (!text) return;
-            if (!API_KEY) { openKeyModal(); return; }
-
             userInput.value = '';
             sendBtn.disabled = true;
             setStatus(false);
@@ -564,8 +635,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                const data = await callAPI(history);
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const reply = await callAI(history);
                 document.getElementById('typing')?.remove();
                 history.push({ role: "model", parts: [{ text: reply }] });
 
@@ -573,14 +643,12 @@
                 aDiv.className = 'msg ai';
                 aDiv.innerHTML = '<div class="sender">[FROX]</div>' + fmtReply(reply);
                 chatBox.appendChild(aDiv);
-
                 if (history.length > 40) history = [history[0], ...history.slice(-38)];
             } catch (err) {
                 document.getElementById('typing')?.remove();
-                const errMsg = err.message || String(err);
                 const eDiv = document.createElement('div');
                 eDiv.className = 'msg ai';
-                eDiv.innerHTML = '<div class="sender">[ERR]</div>' + escHTML(errMsg);
+                eDiv.innerHTML = '<div class="sender">[ERR]</div>' + escHTML(err.message || String(err));
                 chatBox.appendChild(eDiv);
                 history.pop();
             }
@@ -601,6 +669,7 @@
         }
 
         function init() {
+            modelSelect.value = currentModel;
             resetHistory();
             chatBox.innerHTML = '';
             userInput.focus();
@@ -614,8 +683,6 @@
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'p') { e.preventDefault();
                 openPromptEditor(); }
-            if (e.ctrlKey && e.key === 'k') { e.preventDefault();
-                openKeyModal(); }
         });
     </script>
 </body>
