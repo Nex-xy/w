@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>TAP SCREEN</title>
+  <style>
+    /* ----- BLACK & WHITE MONOCHROME SYSTEM ----- */
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    html, body {
+      width: 100%; height: 100%;
+      background: #000000;
+      overflow: hidden;
+      font-family: 'Helvetica Neue', 'Arial Black', 'Impact', sans-serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      position: fixed;
+      top: 0; left: 0;
+    }
+
+    /* ----- STATIC NOISE OVERLAY (Black & White grains) ----- */
+    body::before {
+      content: "";
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIiAvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC4wMyIgLz48L3N2Zz4=');
+      pointer-events: none; z-index: 9998; opacity: 0.5;
+      animation: grainShift 0.2s steps(2) infinite;
+    }
+    @keyframes grainShift { 0% { transform: translate(0,0); } 100% { transform: translate(-1px,-1px); } }
+
+    /* ----- SCANLINES (Subtle white lines on black) ----- */
+    body::after {
+      content: "";
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.03) 0px,
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* ----- MAIN TEXT (Fully responsive, no overflow) ----- */
+    #main-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(2.5rem, 11vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-align: center;
+      text-transform: uppercase;
+      pointer-events: none; z-index: 100;
+      text-shadow: 4px 4px 0 #333333, 8px 8px 0 #111111;
+      animation: textFlicker 3s infinite;
+      width: 90%; max-width: 100%;
+      word-break: break-word;
+      hyphens: auto;
+      line-height: 1.1;
+    }
+
+    @keyframes textFlicker {
+      0%, 18%, 22%, 62%, 64%, 68%, 100% { opacity: 1; }
+      20% { opacity: 0.7; text-shadow: 4px 4px 0 #555, 8px 8px 0 #222; }
+      66% { opacity: 0.5; text-shadow: 2px 2px 0 #777, 4px 4px 0 #444; }
+    }
+
+    /* MONOCHROME GLITCH SPLIT (White/Gray) */
+    #main-text::before, #main-text::after {
+      content: attr(data-text);
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      word-break: break-word;
+    }
+    #main-text::before {
+      color: #ffffff; z-index: -1; opacity: 0.4;
+      animation: glitchUp 2.5s infinite linear alternate;
+      clip-path: inset(0 0 50% 0);
+      text-shadow: -2px 0 #666;
+    }
+    #main-text::after {
+      color: #aaaaaa; z-index: -2; opacity: 0.5;
+      animation: glitchDown 2.9s infinite linear alternate;
+      clip-path: inset(50% 0 0 0);
+      text-shadow: 2px 0 #444;
+    }
+    @keyframes glitchUp { 0%{transform:translate(3px,-3px)} 100%{transform:translate(-2px,2px)} }
+    @keyframes glitchDown { 0%{transform:translate(-3px,3px)} 100%{transform:translate(2px,-2px)} }
+
+    /* ----- BOTTOM WARNING TEXT ----- */
+    #bottom-warning {
+      position: absolute; bottom: 35px; left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(0.9rem, 3.5vw, 1.3rem);
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      color: #999999;
+      text-shadow: 0 0 8px #555;
+      z-index: 100;
+      white-space: nowrap;
+      animation: subtleBlink 2s infinite alternate;
+    }
+    @keyframes subtleBlink { from { opacity: 0.4; } to { opacity: 0.9; } }
+
+    /* ----- MONOCHROME TOUCH GLOW TRACKER ----- */
+    #glow-tracker {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 50;
+      background: radial-gradient(circle 200px at 50% 50%, rgba(255,255,255,0.06) 0%, transparent 70%);
+      transition: background 0.1s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="glow-tracker"></div>
+
+  <div id="main-text" data-text="TOUCH SCREEN">TOUCH SCREEN</div>
+  <div id="bottom-warning">GO ON. TAP IT.</div>
+
+  <audio id="prank-sound" preload="auto" playsinline>
+    <source src="sound.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    (() => {
+      // ----- DOM ELEMENTS -----
+      const body = document.body;
+      const mainText = document.getElementById('main-text');
+      const bottomWarning = document.getElementById('bottom-warning');
+      const glowTracker = document.getElementById('glow-tracker');
+      const audio = document.getElementById('prank-sound');
+
+      let interactionEnabled = true;
+      let restoreTimer = null;
+      let audioUnlocked = false;
+
+      // ----- AUDIO UNLOCK -----
+      function unlockAudio() {
+        if (audio && !audioUnlocked) {
+          audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audioUnlocked = true;
+          }).catch(() => {});
+        }
+      }
+
+      // ----- PRANK TRIGGER -----
+      function triggerPrank(e) {
+        if (!interactionEnabled) return;
+        if (e.cancelable) e.preventDefault();
+
+        // Play audio
+        if (audio) {
+          audio.currentTime = 0;
+          audio.play().catch(() => {});
+        }
+
+        // Monochrome effect: quick background flash to white then back
+        body.style.background = '#ffffff';
+        setTimeout(() => { body.style.background = '#000000'; }, 100);
+
+        // Change text to reaction
+        mainText.textContent = "NICE TOUCH";
+        mainText.setAttribute('data-text', "NICE TOUCH");
+        mainText.style.color = "#000000";
+        mainText.style.textShadow = "4px 4px 0 #ccc, 8px 8px 0 #999";
+
+        bottomWarning.textContent = "WAS IT WORTH IT?";
+        bottomWarning.style.color = "#666666";
+        bottomWarning.style.textShadow = "0 0 10px #888";
+
+        // Vibration
+        if (window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate([150, 50, 150, 50, 250]);
+        }
+
+        // Restore after 1.2 seconds
+        if (restoreTimer) clearTimeout(restoreTimer);
+        restoreTimer = setTimeout(() => {
+          mainText.textContent = "TOUCH SCREEN";
+          mainText.setAttribute('data-text', "TOUCH SCREEN");
+          mainText.style.color = "#ffffff";
+          mainText.style.textShadow = "4px 4px 0 #333, 8px 8px 0 #111";
+          bottomWarning.textContent = "GO ON. TAP IT.";
+          bottomWarning.style.color = "#999999";
+          bottomWarning.style.textShadow = "0 0 8px #555";
+        }, 1200);
+      }
+
+      // ----- EVENT LISTENERS (Mobile First) -----
+      ['click', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, (e) => {
+          unlockAudio();
+          triggerPrank(e);
+        }, { passive: false });
+      });
+
+      // Additional aggressive touch move
+      document.addEventListener('touchmove', (e) => {
+        if (interactionEnabled && e.cancelable) {
+          e.preventDefault();
+          triggerPrank(e);
+        }
+      }, { passive: false });
+
+      // ----- GLOW TRACKER (Follow Touch/Mouse) -----
+      function updateGlow(x, y) {
+        glowTracker.style.background = `radial-gradient(circle 180px at ${x}px ${y}px, rgba(255,255,255,0.1) 0%, transparent 70%)`;
+      }
+
+      document.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) {
+          updateGlow(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      document.addEventListener('mousemove', (e) => {
+        updateGlow(e.clientX, e.clientY);
+      });
+
+      document.addEventListener('touchend', () => {
+        glowTracker.style.background = `radial-gradient(circle 200px at 50% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)`;
+      });
+
+      // ----- DISABLE DEFAULT BROWSER ACTIONS -----
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('gesturestart', e => e.preventDefault());
+      document.addEventListener('gesturechange', e => e.preventDefault());
+
+      // Unlock audio on first interaction
+      document.body.addEventListener('touchstart', unlockAudio, { once: true });
+
+    })();
+  </script>
+</body>
+</html>
