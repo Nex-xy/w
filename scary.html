@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Horror Night</title>
+  <style>
+    /* RESET & BASE – full black & white */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* BLOOD RAIN CANVAS – behind everything */
+    #bloodRain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none; /* allow clicks to pass through */
+    }
+
+    /* POPUP OVERLAY – warning modal */
+    #popupOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .popup-box {
+      background: #111;
+      border: 2px solid #fff;
+      padding: 30px 20px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255,255,255,0.1);
+    }
+    .popup-box h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 25px;
+      word-break: break-word;
+    }
+    .popup-box .btn-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    .popup-box button {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 14px 40px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 4px;
+      letter-spacing: 2px;
+      flex: 1;
+      max-width: 140px;
+    }
+    .popup-box button:active {
+      transform: scale(0.92);
+      background: #aaa;
+    }
+    .popup-box .sub-note {
+      margin-top: 15px;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    /* MAIN HORROR UI – hidden initially */
+    #horrorUI {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: none;  /* shown after 'No' */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* WAIT / COUNTDOWN text */
+    #statusText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(255,255,255,0.6);
+      z-index: 10;
+      letter-spacing: 6px;
+      text-align: center;
+      width: 100%;
+      padding: 0 20px;
+    }
+
+    /* IMAGE CONTAINER */
+    #imageContainer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+    }
+    #imageContainer img {
+      max-width: 95%;
+      max-height: 85%;
+      object-fit: contain;
+      display: block;
+      border: 2px solid #222;
+      box-shadow: 0 0 60px rgba(255,255,255,0.05);
+      z-index: 2;
+      position: relative;
+      background: #000;
+    }
+
+    /* WHITE FLASH OVERLAY – covers the image area (and whole screen) */
+    #flashOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      transition: none; /* we control via JS interval */
+    }
+
+    /* YES-BRANCH CALM SCREEN */
+    #calmScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 30px;
+      text-align: center;
+    }
+    #calmScreen .advice {
+      color: #ddd;
+      font-size: 1.8rem;
+      max-width: 600px;
+      line-height: 1.5;
+      border-left: 4px solid #fff;
+      padding-left: 25px;
+      font-family: 'Georgia', serif;
+      letter-spacing: 1px;
+    }
+
+    /* AUDIO elements hidden */
+    audio {
+      display: none;
+    }
+
+    /* MOBILE TWEAKS */
+    @media (max-width: 500px) {
+      .popup-box h1 { font-size: 1.4rem; }
+      .popup-box button { padding: 12px 20px; font-size: 1.2rem; max-width: 100px; }
+      #statusText { font-size: 3rem; }
+      #calmScreen .advice { font-size: 1.4rem; padding-left: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BLOOD RAIN CANVAS -->
+  <canvas id="bloodRain"></canvas>
+
+  <!-- WHITE FLASH OVERLAY -->
+  <div id="flashOverlay"></div>
+
+  <!-- POPUP WARNING -->
+  <div id="popupOverlay">
+    <div class="popup-box">
+      <h1>⚠️ Warning :<br>Do You Have Heart Problem?</h1>
+      <div class="btn-group">
+        <button id="yesBtn">Yes</button>
+        <button id="noBtn">No</button>
+      </div>
+      <div class="sub-note">(click carefully)</div>
+    </div>
+  </div>
+
+  <!-- CALM SCREEN (Yes branch) -->
+  <div id="calmScreen">
+    <div class="advice" id="adviceText"></div>
+  </div>
+
+  <!-- HORROR UI -->
+  <div id="horrorUI">
+    <div id="statusText">Wait</div>
+    <div id="imageContainer">
+      <img id="mainImage" src="" alt="horror">
+    </div>
+  </div>
+
+  <!-- AUDIO FILES -->
+  <audio id="horrorAudio" src="horror.mp3" preload="auto" loop></audio>
+  <audio id="screamAudio" src="scream.mp3" preload="auto"></audio>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // ---------- CONFIG ----------
+      const IMAGES = [
+        'h1.jpeg', 'h2.jpeg', 'h3.jpeg', 'h4.jpeg',
+        'h5.jpeg', 'h6.jpeg', 'h7.jpeg'
+      ];
+      const IMAGE_INTERVAL = 2000; // 2 sec per image
+      const FLASH_INTERVAL = 120;   // ms between flash toggles
+
+      // Nice advices (for Yes branch)
+      const ADVICE_LIST = [
+        "Stay calm, breathe deeply. Fear is just a shadow – you are the light.",
+        "Your courage is greater than any horror. Close your eyes and smile.",
+        "This is just a simulation. You are safe, loved, and powerful.",
+        "Turn on a lamp, hug a pillow, and remember – nothing can harm you.",
+        "You chose peace. Now let that peace fill your heart completely.",
+        "Fear fades when you face it with a gentle laugh. Try it now.",
+        "You are the master of your mind. Choose serenity over screams."
+      ];
+
+      // DOM refs
+      const popupOverlay = document.getElementById('popupOverlay');
+      const yesBtn = document.getElementById('yesBtn');
+      const noBtn = document.getElementById('noBtn');
+      const horrorUI = document.getElementById('horrorUI');
+      const statusText = document.getElementById('statusText');
+      const mainImage = document.getElementById('mainImage');
+      const flashOverlay = document.getElementById('flashOverlay');
+      const calmScreen = document.getElementById('calmScreen');
+      const adviceText = document.getElementById('adviceText');
+      const horrorAudio = document.getElementById('horrorAudio');
+      const screamAudio = document.getElementById('screamAudio');
+
+      // State
+      let isHorrorActive = false;
+      let imageIndex = 0;
+      let flashInterval = null;
+      let imageTimer = null;
+      let countdownTimer = null;
+      let isFlashing = false;
+
+      // ---------- BLOOD RAIN (canvas) ----------
+      const canvas = document.getElementById('bloodRain');
+      const ctx = canvas.getContext('2d');
+      let drops = [];
+      const DROP_COUNT = 120;
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      // Drop class
+      class Drop {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height - canvas.height;
+          this.length = 10 + Math.random() * 25;
+          this.speed = 3 + Math.random() * 6;
+          this.opacity = 0.3 + Math.random() * 0.6;
+        }
+        update() {
+          this.y += this.speed;
+          if (this.y > canvas.height + 20) this.reset();
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x - 2, this.y + this.length);
+          ctx.strokeStyle = `rgba(180, 20, 20, ${this.opacity})`;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+          // small splatter
+          ctx.beginPath();
+          ctx.arc(this.x - 4, this.y + this.length - 4, 2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(160, 10, 10, ${this.opacity * 0.5})`;
+          ctx.fill();
+        }
+      }
+
+      function initDrops() {
+        drops = [];
+        for (let i = 0; i < DROP_COUNT; i++) {
+          const d = new Drop();
+          d.y = Math.random() * canvas.height; // start scattered
+          drops.push(d);
+        }
+      }
+      initDrops();
+
+      function animateRain() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drops.forEach(d => {
+          d.update();
+          d.draw();
+        });
+        requestAnimationFrame(animateRain);
+      }
+      animateRain();
+
+      // ---------- AUDIO helpers ----------
+      function playHorrorBackground() {
+        horrorAudio.currentTime = 0;
+        horrorAudio.loop = true;
+        horrorAudio.volume = 0.7;
+        horrorAudio.play().catch(() => {});
+      }
+
+      function playScream() {
+        screamAudio.currentTime = 0;
+        screamAudio.volume = 0.9;
+        screamAudio.play().catch(() => {});
+      }
+
+      // ---------- FLASH control ----------
+      function startFlash() {
+        if (flashInterval) clearInterval(flashInterval);
+        isFlashing = true;
+        let toggle = false;
+        flashInterval = setInterval(() => {
+          toggle = !toggle;
+          flashOverlay.style.opacity = toggle ? '0.85' : '0';
+        }, FLASH_INTERVAL);
+      }
+
+      function stopFlash() {
+        if (flashInterval) {
+          clearInterval(flashInterval);
+          flashInterval = null;
+        }
+        flashOverlay.style.opacity = '0';
+        isFlashing = false;
+      }
+
+      // ---------- IMAGE CYCLER ----------
+      function showNextImage() {
+        if (!isHorrorActive) return;
+
+        if (imageIndex >= IMAGES.length) {
+          // all 7 shown – stop horror, maybe show end screen
+          stopFlash();
+          statusText.textContent = '💀';
+          statusText.style.display = 'block';
+          mainImage.style.display = 'none';
+          // stop background music? keep it for atmosphere
+          return;
+        }
+
+        // Update image
+        mainImage.src = IMAGES[imageIndex];
+        mainImage.style.display = 'block';
+        statusText.style.display = 'none';
+
+        // Play scream
+        playScream();
+
+        // Start flash (restart to sync)
+        startFlash();
+
+        imageIndex++;
+
+        // Set timer for next image
+        if (imageTimer) clearTimeout(imageTimer);
+        imageTimer = setTimeout(() => {
+          showNextImage();
+        }, IMAGE_INTERVAL);
+      }
+
+      // ---------- COUNTDOWN ----------
+      function startCountdown() {
+        let count = 3;
+        statusText.textContent = count;
+        statusText.style.display = 'block';
+        mainImage.style.display = 'none';
+
+        countdownTimer = setInterval(() => {
+          count--;
+          if (count > 0) {
+            statusText.textContent = count;
+          } else {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+            // Countdown finished → start horror show
+            statusText.textContent = '💀';
+            setTimeout(() => {
+              statusText.style.display = 'none';
+              // Start background horror music
+              playHorrorBackground();
+              // Begin image cycle
+              imageIndex = 0;
+              showNextImage();
+            }, 400);
+          }
+        }, 1000);
+      }
+
+      // ---------- INIT HORROR (No branch) ----------
+      function startHorror() {
+        isHorrorActive = true;
+        horrorUI.style.display = 'flex';
+        popupOverlay.style.display = 'none';
+        calmScreen.style.display = 'none';
+
+        // Show "Wait" initially
+        statusText.textContent = 'Wait';
+        statusText.style.display = 'block';
+        mainImage.style.display = 'none';
+
+        // After 1.5s, "Wait" disappears and countdown starts
+        setTimeout(() => {
+          if (!isHorrorActive) return;
+          statusText.textContent = '3'; // immediate countdown start
+          startCountdown();
+        }, 1500);
+      }
+
+      // ---------- YES branch (calm) ----------
+      function handleYes() {
+        // Stop any ongoing horror
+        isHorrorActive = false;
+        if (countdownTimer) clearInterval(countdownTimer);
+        if (imageTimer) clearTimeout(imageTimer);
+        stopFlash();
+        horrorAudio.pause();
+        screamAudio.pause();
+
+        // Show calm screen with random advice
+        popupOverlay.style.display = 'none';
+        horrorUI.style.display = 'none';
+        calmScreen.style.display = 'flex';
+
+        const randomIdx = Math.floor(Math.random() * ADVICE_LIST.length);
+        adviceText.textContent = ADVICE_LIST[randomIdx];
+      }
+
+      // ---------- EVENT BINDINGS ----------
+      yesBtn.addEventListener('click', handleYes);
+      noBtn.addEventListener('click', function() {
+        // User clicked No → start horror (must be after user gesture for audio)
+        // Preload audio context by playing silent? We'll just call startHorror
+        // But audio play will be triggered inside startHorror via user gesture chain.
+        startHorror();
+      });
+
+      // Also handle if user taps outside? no.
+
+      // Prevent default touch behaviors
+      document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('#popupOverlay') || e.target.closest('#calmScreen')) return;
+        e.preventDefault();
+      }, { passive: false });
+
+      // ---------- CLEANUP on page unload ----------
+      window.addEventListener('beforeunload', function() {
+        if (flashInterval) clearInterval(flashInterval);
+        if (imageTimer) clearTimeout(imageTimer);
+        if (countdownTimer) clearInterval(countdownTimer);
+        horrorAudio.pause();
+        screamAudio.pause();
+      });
+
+      console.log('🔥 Horror site ready – choose wisely!');
+    })();
+  </script>
+</body>
+</html>
