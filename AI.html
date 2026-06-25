@@ -18,9 +18,10 @@
             --sidebar-width: 270px;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height: 100%; }
         body {
             background: var(--black); color: var(--white); font-family: var(--font);
-            min-height: 100vh; display: flex; -webkit-tap-highlight-color: transparent; overflow: hidden;
+            display: flex; -webkit-tap-highlight-color: transparent; overflow: hidden;
         }
         body::before {
             content: '';
@@ -31,7 +32,7 @@
 
         /* SIDEBAR */
         .sidebar {
-            position: fixed; top:0; left:0; width:var(--sidebar-width); height:100vh;
+            position: fixed; top:0; left:0; width:var(--sidebar-width); height:100%;
             background:#0a0a0a; border-right:1px solid var(--gray30);
             display:flex; flex-direction:column; z-index:200;
             transform:translateX(-100%); transition:transform 0.2s ease;
@@ -68,7 +69,7 @@
         /* MAIN LAYOUT */
         .main {
             flex:1; display:flex; flex-direction:column; transition:margin-left 0.2s ease;
-            margin-left:0;
+            margin-left:0; overflow: hidden;
         }
         .sidebar.open ~ .main { margin-left:var(--sidebar-width); }
 
@@ -118,12 +119,12 @@
         .msg pre {
             background:var(--gray10); border:1px solid var(--gray30); padding:8px 10px;
             border-radius:2px; overflow-x:auto; font-size:11px; margin:6px 0; color:var(--gray85);
-            position: relative; white-space: pre-wrap; word-break: break-all;
+            position: relative; white-space: pre-wrap; word-break: normal; tab-size: 4;
         }
         .msg .copy-btn {
             position: absolute; top:4px; right:4px; background:var(--black); border:1px solid var(--white);
             color:var(--white); font-family:var(--font); font-size:8px; padding:2px 6px; cursor:pointer;
-            letter-spacing:1px; opacity:0.6;
+            letter-spacing:1px; opacity:0.6; z-index:2;
         }
         .msg .copy-btn:hover { opacity:1; }
 
@@ -513,22 +514,42 @@ async function getAIResponse(userMessage) {
     throw new Error('All AI endpoints failed. ' + (lastError?.message || ''));
 }
 
-// ============ SAFE FORMATTING ============
-function fmtReply(text) {
-    let escaped = escHTML(text);
-    escaped = escaped.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
-        return '<pre>' + code + '</pre>';
-    });
-    escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
-    escaped = escaped.replace(/\n/g, '<br>');
-    return escaped;
-}
+// ============ SAFE FORMATTING (preserves code newlines) ============
 function escHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// ============ SCROLL HELPER ============
+function fmtReply(text) {
+    // 1. Extract fenced code blocks, replace with placeholders
+    const codeBlocks = [];
+    let processed = text.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+        const idx = codeBlocks.length;
+        codeBlocks.push({ lang, code: escHTML(code) }); // escape code content
+        return `___CODEBLOCK_${idx}___`;
+    });
+
+    // 2. Escape remaining text (parts not in code blocks)
+    processed = escHTML(processed);
+
+    // 3. Replace newlines with <br> in the escaped text (placeholders are plain text so safe)
+    processed = processed.replace(/\n/g, '<br>');
+
+    // 4. Restore code blocks as <pre>
+    processed = processed.replace(/___CODEBLOCK_(\d+)___/g, (m, idx) => {
+        const block = codeBlocks[parseInt(idx)];
+        return `<pre>${block.code}</pre>`;
+    });
+
+    // 5. Handle inline code `...`
+    processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    return processed;
+}
+
+// ============ SCROLL HELPER (reliable) ============
 function scrollToBottom() {
+    // multiple attempts to ensure scroll after render
     requestAnimationFrame(() => {
         chatBox.scrollTop = chatBox.scrollHeight;
+        setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
     });
 }
 
