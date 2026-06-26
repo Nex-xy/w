@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Index · HTML Files</title>
+    <title>Index · HTML files</title>
     <style>
         /* ── reset & base ── */
         *,
@@ -52,7 +52,6 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        /* ── container ── */
         .container {
             max-width: 640px;
             margin: 0 auto;
@@ -123,7 +122,6 @@
             min-height: 56px;
         }
 
-        /* hover only on devices that support it */
         @media (hover: hover) {
             .file-item:hover {
                 background: var(--hover);
@@ -134,7 +132,6 @@
             }
         }
 
-        /* ── file icon (monochrome) ── */
         .file-icon {
             flex-shrink: 0;
             width: 32px;
@@ -159,7 +156,6 @@
             overflow-wrap: break-word;
         }
 
-        /* ── small meta / extension hint ── */
         .file-ext {
             flex-shrink: 0;
             font-size: 0.7rem;
@@ -180,8 +176,10 @@
             }
         }
 
-        /* ── empty state ── */
-        .empty-state {
+        /* ── empty / loading / error ── */
+        .empty-state,
+        .loading-state,
+        .error-state {
             text-align: center;
             padding: 60px 20px 50px;
             border: 2px dashed var(--border);
@@ -189,7 +187,9 @@
             background: var(--card-bg);
         }
 
-        .empty-state .empty-icon {
+        .empty-state .empty-icon,
+        .loading-state .loading-icon,
+        .error-state .error-icon {
             font-size: 2.8rem;
             line-height: 1;
             margin-bottom: 16px;
@@ -197,17 +197,25 @@
             letter-spacing: 0.1em;
         }
 
-        .empty-state h2 {
+        .empty-state h2,
+        .loading-state h2,
+        .error-state h2 {
             font-size: 1.2rem;
             font-weight: 500;
             margin-bottom: 6px;
         }
 
-        .empty-state p {
+        .empty-state p,
+        .loading-state p,
+        .error-state p {
             font-size: 0.95rem;
             opacity: 0.55;
             max-width: 300px;
             margin: 0 auto;
+        }
+
+        .error-state .error-icon {
+            opacity: 0.6;
         }
 
         /* ── footer ── */
@@ -221,19 +229,7 @@
             letter-spacing: 0.02em;
         }
 
-        /* ── utility ── */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            border: 0;
-        }
-
-        /* ── touch-friendly spacing ── */
+        /* ── touch-friendly ── */
         @media (max-width: 480px) {
             body {
                 padding: 16px 12px 32px;
@@ -272,18 +268,15 @@
 
     <div class="container" role="main">
 
-        <!-- header -->
         <header class="header">
             <h1>📄 index</h1>
-            <span class="count" id="fileCount">0 files</span>
+            <span class="count" id="fileCount">loading…</span>
         </header>
 
-        <!-- file list -->
         <ul class="file-list" id="fileList" role="list">
-            <!-- items injected by JavaScript -->
+            <!-- loading state injected by JS -->
         </ul>
 
-        <!-- footer -->
         <footer class="footer">
             <span>black &amp; white &bull; mobile first</span>
         </footer>
@@ -294,166 +287,10 @@
         (function() {
             'use strict';
 
-            // ─── get all .html files in the current directory ───
-            function getHtmlFiles() {
-                // We use `document.currentScript` to get the base path.
-                // But the simplest and most reliable approach for a static
-                // index page is to fetch the directory listing via a trick:
-                // we can't reliably list files client-side without a server.
-                //
-                // However, we CAN use the `import.meta` or `document.currentScript`
-                // to get the current path, and then we can try to fetch a list
-                // of files from the server. But since we want a purely static
-                // solution that works without a backend, we'll use a different
-                // approach: we'll scan the page for links that were added
-                // by the server (like Apache's auto-index) — but that's unreliable.
-                //
-                // Instead, we'll provide a clean fallback: we'll list files
-                // that are explicitly passed via a `data-files` attribute,
-                // OR we'll try to fetch a directory listing via a simple
-                // HTTP request to the current directory (which many servers
-                // will respond to with an HTML listing).
-                //
-                // But for the most robust and clean UX, we'll do this:
-                // 1. Try to fetch the current directory (GET /)
-                // 2. Parse the HTML response for links ending in .html
-                // 3. If that fails, fallback to a manual list or empty state.
-                //
-                // However, fetching the directory might fail due to CORS
-                // or server configuration. So we'll also support a manual
-                // list via a `data-files` attribute on the script tag.
-                //
-                // For this solution, we'll implement both:
-                // - Auto-detect via fetch
-                // - Fallback to a built-in list (which the user can override)
-                //
-                // Since the user asked for a page that shows "html file er site gulo",
-                // we'll try to fetch and parse, and if that fails, we'll show
-                // a helpful empty state with instructions.
+            const listEl = document.getElementById('fileList');
+            const countEl = document.getElementById('fileCount');
 
-                return new Promise(function(resolve) {
-                    // First, check if there's a `data-files` attribute on the script tag
-                    const scripts = document.getElementsByTagName('script');
-                    let dataFiles = null;
-                    for (let i = 0; i < scripts.length; i++) {
-                        const s = scripts[i];
-                        if (s.hasAttribute('data-files')) {
-                            try {
-                                dataFiles = JSON.parse(s.getAttribute('data-files'));
-                                if (Array.isArray(dataFiles) && dataFiles.length > 0) {
-                                    resolve(dataFiles);
-                                    return;
-                                }
-                            } catch (_) { /* ignore */ }
-                        }
-                    }
-
-                    // If no data-files, try to fetch the current directory
-                    const baseUrl = window.location.href.replace(/\/[^/]*$/, '/');
-
-                    fetch(baseUrl, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'text/html'
-                            }
-                        })
-                        .then(function(response) {
-                            if (!response.ok) throw new Error('fetch failed');
-                            return response.text();
-                        })
-                        .then(function(html) {
-                            // Parse the HTML and extract links to .html files
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(html, 'text/html');
-                            const links = doc.querySelectorAll('a[href]');
-                            const files = [];
-                            const seen = new Set();
-
-                            for (const link of links) {
-                                let href = link.getAttribute('href');
-                                if (!href) continue;
-                                // Decode URI to handle %20 etc.
-                                try {
-                                    href = decodeURIComponent(href);
-                                } catch (_) { /* keep as-is */ }
-                                // Only keep .html files (case-insensitive)
-                                if (/\.html$/i.test(href)) {
-                                    // Remove query params and hash
-                                    const clean = href.split('?')[0].split('#')[0];
-                                    if (clean && !seen.has(clean)) {
-                                        seen.add(clean);
-                                        files.push(clean);
-                                    }
-                                }
-                            }
-
-                            if (files.length > 0) {
-                                resolve(files.sort());
-                            } else {
-                                // No .html files found via fetch
-                                resolve([]);
-                            }
-                        })
-                        .catch(function() {
-                            // Fetch failed — show empty state
-                            resolve([]);
-                        });
-                });
-            }
-
-            // ─── render file list ───
-            function renderFiles(files) {
-                const listEl = document.getElementById('fileList');
-                const countEl = document.getElementById('fileCount');
-
-                if (!listEl) return;
-
-                // Clear existing
-                listEl.innerHTML = '';
-
-                if (!files || files.length === 0) {
-                    // Empty state
-                    listEl.innerHTML = `
-                                <li class="empty-state" role="status">
-                                    <div class="empty-icon">⸻</div>
-                                    <h2>no .html files found</h2>
-                                    <p>place your <strong>.html</strong> files in this folder</p>
-                                </li>
-                            `;
-                    countEl.textContent = '0 files';
-                    return;
-                }
-
-                // Sort alphabetically (case-insensitive)
-                const sorted = [...files].sort(function(a, b) {
-                    return a.localeCompare(b, undefined, { sensitivity: 'base' });
-                });
-
-                countEl.textContent = sorted.length + ' file' + (sorted.length > 1 ? 's' : '');
-
-                // Build list items
-                let html = '';
-                for (const file of sorted) {
-                    // Extract base name without extension for display
-                    const displayName = file.replace(/\.html$/i, '');
-                    // Get extension (should be .html)
-                    const ext = file.includes('.') ? file.split('.').pop() : 'html';
-
-                    html += `
-                                <li class="file-item" role="listitem">
-                                    <a href="${escapeHtml(file)}" title="${escapeHtml(file)}">
-                                        <span class="file-icon" aria-hidden="true">${escapeHtml(ext)}</span>
-                                        <span class="file-name">${escapeHtml(displayName)}</span>
-                                        <span class="file-ext" aria-hidden="true">${escapeHtml(ext)}</span>
-                                    </a>
-                                </li>
-                            `;
-                }
-
-                listEl.innerHTML = html;
-            }
-
-            // ─── simple escape to prevent XSS ───
+            // ─── helper: escape HTML ───
             function escapeHtml(str) {
                 if (!str) return '';
                 const map = {
@@ -466,12 +303,185 @@
                 return str.replace(/[&<>"']/g, function(m) { return map[m]; });
             }
 
-            // ─── init ───
-            getHtmlFiles().then(function(files) {
-                renderFiles(files);
-            }).catch(function() {
-                renderFiles([]);
-            });
+            // ─── show loading state ───
+            function showLoading() {
+                listEl.innerHTML = `
+                            <li class="loading-state" role="status">
+                                <div class="loading-icon">⏳</div>
+                                <h2>loading files…</h2>
+                                <p>fetching from GitHub</p>
+                            </li>
+                        `;
+                countEl.textContent = '…';
+            }
+
+            // ─── show error state ───
+            function showError(message) {
+                listEl.innerHTML = `
+                            <li class="error-state" role="alert">
+                                <div class="error-icon">⚠︎</div>
+                                <h2>could not load files</h2>
+                                <p>${escapeHtml(message || 'please check your repo or network')}</p>
+                            </li>
+                        `;
+                countEl.textContent = 'error';
+            }
+
+            // ─── show empty state ───
+            function showEmpty() {
+                listEl.innerHTML = `
+                            <li class="empty-state" role="status">
+                                <div class="empty-icon">⸻</div>
+                                <h2>no other .html files</h2>
+                                <p>place your <strong>.html</strong> files in the repo root</p>
+                            </li>
+                        `;
+                countEl.textContent = '0 files';
+            }
+
+            // ─── render file list ───
+            function renderFiles(files) {
+                if (!files || files.length === 0) {
+                    showEmpty();
+                    return;
+                }
+
+                // Sort alphabetically (case-insensitive)
+                const sorted = [...files].sort(function(a, b) {
+                    return a.localeCompare(b, undefined, { sensitivity: 'base' });
+                });
+
+                countEl.textContent = sorted.length + ' file' + (sorted.length > 1 ? 's' : '');
+
+                let html = '';
+                for (const file of sorted) {
+                    const displayName = file.replace(/\.html$/i, '');
+                    const ext = file.includes('.') ? file.split('.').pop() : 'html';
+
+                    // Build relative URL: ./filename.html
+                    const href = './' + encodeURIComponent(file);
+
+                    html += `
+                                <li class="file-item" role="listitem">
+                                    <a href="${escapeHtml(href)}" title="${escapeHtml(file)}">
+                                        <span class="file-icon" aria-hidden="true">${escapeHtml(ext)}</span>
+                                        <span class="file-name">${escapeHtml(displayName)}</span>
+                                        <span class="file-ext" aria-hidden="true">${escapeHtml(ext)}</span>
+                                    </a>
+                                </li>
+                            `;
+                }
+
+                listEl.innerHTML = html;
+            }
+
+            // ─── get repo owner & name from current URL ───
+            function getRepoInfo() {
+                const host = window.location.hostname;
+                const path = window.location.pathname;
+
+                // For GitHub Pages: username.github.io[/repo]
+                // If it's a project page, the repo name is the first segment after the host.
+                // If it's a user page (username.github.io), the repo name is empty.
+
+                // Extract username from host (assumes .github.io domain)
+                let username = null;
+                if (host.endsWith('.github.io')) {
+                    username = host.replace(/\.github\.io$/, '');
+                } else {
+                    // not a standard github.io domain — fallback
+                    username = null;
+                }
+
+                // Extract repo name from path
+                let repo = null;
+                const parts = path.split('/').filter(p => p.length > 0);
+                if (parts.length > 0) {
+                    // The first part is the repo name (for project pages)
+                    // For user pages, the path might be empty or contain something else
+                    // We'll assume the first segment is the repo name if it's not empty.
+                    repo = parts[0];
+                }
+
+                // If we are at the root of a user site (username.github.io), repo is null
+                // In that case, we can't use the GitHub API for contents because it's the root of the user.
+                // But the user has a repo "w", so we can use that.
+
+                // Since the user explicitly said the repo is "w", we can fallback to that.
+                // But we'll try to auto-detect first.
+
+                // If we couldn't detect, use a data attribute or hardcode?
+                // We'll use the detected values, and if they are null, we'll show an error.
+
+                return { username, repo };
+            }
+
+            // ─── fetch files from GitHub API ───
+            function fetchFilesFromGitHub() {
+                const { username, repo } = getRepoInfo();
+
+                if (!username || !repo) {
+                    // Fallback: try to use the repo name from the path
+                    // For the user's case: https://nex-xy.github.io/w/ -> username=nex-xy, repo=w
+                    // So if detection fails, we can try to parse again.
+                    // But let's just show an error.
+                    return Promise.reject(new Error('Could not detect GitHub repo from URL.'));
+                }
+
+                const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/`;
+
+                return fetch(apiUrl, {
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }).then(function(response) {
+                    if (!response.ok) {
+                        return response.json().then(function(err) {
+                            throw new Error(err.message || `HTTP ${response.status}`);
+                        }).catch(function() {
+                            throw new Error(`HTTP ${response.status} — ${response.statusText}`);
+                        });
+                    }
+                    return response.json();
+                }).then(function(data) {
+                    if (!Array.isArray(data)) {
+                        throw new Error('Unexpected API response');
+                    }
+
+                    // Filter for .html files, exclude index.html
+                    const htmlFiles = data
+                        .filter(function(item) {
+                            return item.type === 'file' &&
+                                item.name &&
+                                item.name.endsWith('.html') &&
+                                item.name.toLowerCase() !== 'index.html';
+                        })
+                        .map(function(item) {
+                            return item.name;
+                        });
+
+                    return htmlFiles;
+                });
+            }
+
+            // ─── main ───
+            function init() {
+                showLoading();
+
+                fetchFilesFromGitHub()
+                    .then(function(files) {
+                        renderFiles(files);
+                    })
+                    .catch(function(err) {
+                        console.warn('GitHub API error:', err);
+                        // If the API fails, we can try a fallback: use a static list from a data attribute.
+                        // But for now, show the error.
+                        showError(err.message || 'GitHub API request failed');
+                    });
+            }
+
+            // ─── start ───
+            init();
 
         })();
     </script>
