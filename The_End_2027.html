@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080608">
+<meta name="description" content="THE END ERA — SSC Batch 2027. Our final chapter. Our forever legacy.">
+<title>THE END ERA // SSC BATCH 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070607;--panel:#100b0d;--red:#ff1738;--red2:#a90020;--white:#f5f1f2;--muted:#a49a9d;--line:rgba(255,23,56,.26);--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;--body:'Rajdhani',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--white);font-family:var(--body);overflow-x:hidden;cursor:crosshair}
+::selection{background:var(--red);color:#fff}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+#storm{position:fixed;inset:0;pointer-events:none;z-index:20;opacity:0;mix-blend-mode:screen;background:#ff1738}
+#storm.flash{animation:stormFlash .65s ease-out}
+@keyframes stormFlash{0%{opacity:.22}10%{opacity:0}18%{opacity:.16}30%{opacity:0}100%{opacity:0}}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
+.scanlines{position:fixed;inset:0;z-index:30;pointer-events:none;opacity:.12;background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(255,255,255,.08) 4px)}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 25%,rgba(0,0,0,.72) 100%)}
+.site{position:relative;z-index:2}
+.nav{position:fixed;top:0;left:0;width:100%;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(18px,5vw,70px);background:linear-gradient(#070607eF,transparent);border-bottom:1px solid rgba(255,23,56,.12);backdrop-filter:blur(8px)}
+.brand{font:800 13px var(--display);letter-spacing:2px}.brand span{color:var(--red);text-shadow:0 0 12px #ff173888}
+.navlinks{display:flex;gap:25px;align-items:center}.navlinks a{font:12px var(--mono);color:#c5babe;letter-spacing:1px;transition:.25s}.navlinks a:hover{color:var(--red);text-shadow:0 0 10px var(--red)}
+.menu-btn{display:none;background:none;color:#fff;border:1px solid var(--line);padding:8px 10px;font:12px var(--mono)}
+.hero{min-height:100svh;display:grid;place-items:center;text-align:center;padding:125px 20px 75px;position:relative;isolation:isolate;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(ellipse at 50% 48%,rgba(153,0,28,.2),transparent 58%),linear-gradient(180deg,#070607 0%,#100609 60%,#070607 100%)}
+.hero:after{content:"";position:absolute;inset:0;z-index:-1;opacity:.22;background-image:linear-gradient(rgba(255,23,56,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,23,56,.12) 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(transparent,black 25%,black 75%,transparent)}
+.hero-inner{max-width:1050px}
+.kicker{font:12px var(--mono);letter-spacing:5px;color:var(--red);text-transform:uppercase;display:flex;gap:12px;justify-content:center;align-items:center;animation:rise .9s both}
+.kicker:before,.kicker:after{content:"";width:35px;height:1px;background:var(--red);box-shadow:0 0 9px var(--red)}
+.hero h1{font:900 clamp(2.7rem,10.5vw,8.6rem)/.92 var(--display);letter-spacing:-.055em;margin:30px 0 22px;text-transform:uppercase;position:relative;animation:rise 1s .12s both}
+.glitch{color:#fff;text-shadow:3px 0 var(--red),-3px 0 #5e0013;position:relative;display:inline-block}
+.glitch:before,.glitch:after{content:attr(data-text);position:absolute;inset:0;overflow:hidden;clip-path:inset(0 0 0 0)}
+.glitch:before{color:#ff1738;transform:translateX(-2px);animation:glitchA 3s infinite steps(1)}
+.glitch:after{color:#fff;transform:translateX(2px);animation:glitchB 2.7s infinite steps(1)}
+@keyframes glitchA{0%,91%,100%{clip-path:inset(0 0 100% 0)}92%{clip-path:inset(8% 0 72% 0);transform:translate(-7px,-2px)}94%{clip-path:inset(46% 0 37% 0);transform:translate(5px,1px)}96%{clip-path:inset(75% 0 10% 0);transform:translate(-3px,0)}}
+@keyframes glitchB{0%,86%,100%{clip-path:inset(100% 0 0 0)}87%{clip-path:inset(30% 0 54% 0);transform:translate(6px,1px)}89%{clip-path:inset(65% 0 22% 0);transform:translate(-4px,-1px)}}
+.hero h1 .end{display:block;color:var(--red);text-shadow:0 0 18px #ff173866,0 0 55px #ff173833}
+.subtitle{font:clamp(11px,2vw,14px) var(--mono);letter-spacing:clamp(2px,1vw,6px);color:#c6b9bd;animation:rise 1s .25s both}
+.hero-copy{max-width:600px;margin:24px auto 0;color:#a99ca0;font-size:clamp(17px,2vw,21px);line-height:1.45;animation:rise 1s .4s both}
+.hero-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:35px;animation:rise 1s .55s both}
+.btn{border:1px solid var(--red);background:var(--red);color:#090608;padding:13px 20px;font:700 11px var(--mono);letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.25s;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.btn:hover{background:transparent;color:#fff;box-shadow:0 0 24px #ff173844;transform:translateY(-3px)}
+.btn.ghost{background:transparent;color:#fff;border-color:#594047}.btn.ghost:hover{border-color:var(--red);color:var(--red)}
+.scrollhint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font:10px var(--mono);letter-spacing:3px;color:#887a7e;animation:bob 1.8s infinite}
+.scrollhint span{display:block;color:var(--red);font-size:18px;margin-top:7px}
+@keyframes bob{50%{transform:translate(-50%,6px)}}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+section{padding:105px clamp(20px,7vw,105px);position:relative}
+.section-top{display:flex;align-items:center;gap:12px;font:11px var(--mono);letter-spacing:3px;color:var(--red);margin-bottom:18px}
+.section-top:before{content:"";width:26px;height:1px;background:var(--red)}
+h2{font:800 clamp(2rem,5vw,4.4rem)/1.05 var(--display);letter-spacing:-.04em;text-transform:uppercase}
+h2 .red{color:var(--red);text-shadow:0 0 22px #ff173833}
+.lead{font-size:20px;color:var(--muted);line-height:1.5;max-width:690px;margin-top:18px}
+.intro-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(25px,6vw,80px);align-items:center}
+.warning-card{border:1px solid var(--line);padding:26px;background:linear-gradient(135deg,rgba(255,23,56,.09),rgba(0,0,0,.1));position:relative;overflow:hidden}
+.warning-card:before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red);box-shadow:0 0 20px var(--red)}
+.warning-card .label{font:11px var(--mono);color:var(--red);letter-spacing:2px}
+.warning-card strong{display:block;font:700 clamp(20px,3vw,31px) var(--display);margin:18px 0 12px}
+.warning-card p{color:#b9aeb1;font-size:18px;line-height:1.5}
+.warning-card .coordinates{margin-top:24px;padding-top:14px;border-top:1px solid var(--line);font:10px var(--mono);color:#8f7f83;display:flex;justify-content:space-between;gap:10px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:.45;margin:0 7%}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:38px}
+.card{position:relative;border:1px solid #322027;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,23,56,.025));padding:25px;min-height:215px;transition:transform .3s,border-color .3s,box-shadow .3s;overflow:hidden}
+.card:hover{transform:translateY(-7px);border-color:var(--red);box-shadow:0 14px 35px #ff173813}
+.card-num{font:12px var(--mono);color:var(--red)}
+.card h3{font:700 19px var(--display);margin:27px 0 12px;text-transform:uppercase}
+.card p{font-size:18px;color:#a99da1;line-height:1.4}
+.card .arrow{position:absolute;right:20px;top:17px;color:#5d3942;font-size:22px}
+.countdown-wrap{margin-top:38px;border:1px solid var(--line);padding:clamp(20px,5vw,45px);background:radial-gradient(ellipse at 50% 0,rgba(255,23,56,.11),transparent 70%);text-align:center}
+.countdown-label{font:11px var(--mono);letter-spacing:4px;color:#b9a9ad}
+.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:720px;margin:28px auto 0}
+.timebox{padding:18px 8px;border:1px solid #3d2028;background:#080608}
+.timebox strong{display:block;font:800 clamp(25px,6vw,53px) var(--display);color:var(--red);text-shadow:0 0 18px #ff173844}
+.timebox span{display:block;font:10px var(--mono);color:#9f9094;letter-spacing:2px;margin-top:8px}
+.note{font:11px var(--mono);color:#75686c;margin-top:20px}
+.message{max-width:900px;margin:auto;text-align:center;padding:50px 10px}
+.quote-mark{font:90px Georgia,serif;color:var(--red);opacity:.8;line-height:.7}
+.message h2{margin:20px 0}
+.message p{font-size:clamp(19px,3vw,27px);color:#b9adb0;line-height:1.55;max-width:760px;margin:0 auto}
+.message .highlight{color:#fff;text-shadow:0 0 15px #ff173855}
+.final-section{min-height:75vh;display:grid;place-items:center;text-align:center;overflow:hidden;background:radial-gradient(ellipse at center,rgba(125,0,24,.17),transparent 58%)}
+.final-section .final-label{font:11px var(--mono);letter-spacing:5px;color:#a99a9e}
+.final-title{font:900 clamp(2.7rem,9vw,7.6rem)/.95 var(--display);margin:25px 0;letter-spacing:-.05em}
+.final-title span{display:block;color:var(--red);text-shadow:0 0 20px #ff173855,0 0 60px #ff173822}
+.final-copy{font-size:20px;color:#a99ca0;max-width:620px;margin:0 auto;line-height:1.5}
+.final-stamp{display:inline-block;margin-top:34px;border:1px solid var(--red);padding:13px 18px;font:12px var(--mono);letter-spacing:3px;color:var(--red);animation:stampPulse 2.2s infinite}
+@keyframes stampPulse{50%{box-shadow:0 0 25px #ff173833;text-shadow:0 0 8px #ff1738}}
+footer{text-align:center;padding:38px 20px 30px;border-top:1px solid #28151b;color:#766a6e;font:10px var(--mono);letter-spacing:2px}
+footer .footline{margin-top:12px;letter-spacing:1px}
+.aam{font:900 clamp(3rem,11vw,7rem)/1 var(--display);letter-spacing:.13em;color:#fff;margin-top:24px;display:inline-block;position:relative;animation:aamGlitch 3s infinite;text-shadow:0 0 12px #ff173855,0 0 40px #ff173822}
+.aam:after{content:"AAM";position:absolute;inset:0;color:var(--red);z-index:-1;transform:translate(4px,2px);opacity:.7;animation:aamAfter 1.7s infinite steps(1)}
+@keyframes aamGlitch{0%,90%,100%{transform:translate(0)}91%{transform:translate(-3px,1px)}93%{transform:translate(3px,-1px)}95%{transform:translate(-1px,0)}}
+@keyframes aamAfter{0%,80%,100%{clip-path:inset(100% 0 0 0)}82%{clip-path:inset(15% 0 60% 0)}86%{clip-path:inset(65% 0 10% 0)}}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.progress{position:fixed;left:0;top:0;height:2px;width:0;background:var(--red);z-index:100;box-shadow:0 0 10px var(--red)}
+.smallprint{font:10px var(--mono);color:#6f6266;margin-top:12px}
+@media(max-width:760px){
+ .nav{padding:15px 18px}.menu-btn{display:block}.navlinks{display:none;position:absolute;top:58px;left:12px;right:12px;padding:18px;background:#0d080a;border:1px solid var(--line);flex-direction:column;gap:18px;align-items:flex-start}.navlinks.open{display:flex}
+ .hero{min-height:94svh;padding-top:115px}.kicker{letter-spacing:2px;font-size:10px}.kicker:before,.kicker:after{width:18px}.hero h1{margin:25px 0 18px}.subtitle{letter-spacing:2px;line-height:1.8}.hero-copy{font-size:18px}
+ section{padding:75px 20px}.intro-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.card{min-height:0}.card h3{margin-top:18px}
+ .countdown{gap:7px}.timebox{padding:15px 4px}.timebox span{font-size:8px;letter-spacing:1px}.countdown-label{letter-spacing:2px}
+ .final-section{min-height:65vh}.final-label{letter-spacing:2px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="storm"></div><canvas id="particles"></canvas><div class="vignette"></div><div class="scanlines"></div><div class="progress" id="progress"></div>
+<div class="site">
+<header class="nav">
+  <a class="brand" href="#home">SSC <span>// 2027</span></a>
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation" aria-expanded="false">MENU ☰</button>
+  <nav class="navlinks" id="navlinks">
+    <a href="#era">THE ERA</a><a href="#chapters">CHAPTERS</a><a href="#countdown">COUNTDOWN</a><a href="#legacy">LEGACY</a>
+  </nav>
+</header>
+<main>
+<section class="hero" id="home">
+ <div class="hero-inner">
+  <div class="kicker">THE FINAL CHAPTER BEGINS</div>
+  <h1><span class="glitch" data-text="THE END">THE END</span><span class="end">ERA.</span></h1>
+  <div class="subtitle">SSC BATCH 2027 // THE LAST RUN</div>
+  <p class="hero-copy">One batch. A thousand memories. One final chapter before the world opens up.</p>
+  <div class="hero-actions"><a class="btn" href="#era">ENTER THE ERA ↘</a><a class="btn ghost" href="#legacy">OUR LEGACY</a></div>
+ </div>
+ <div class="scrollhint">SCROLL TO DESCEND<span>⌄</span></div>
+</section>
+<div class="divider"></div>
+<section id="era">
+ <div class="intro-grid reveal">
+  <div>
+   <div class="section-top">01 // THE MEANING</div>
+   <h2>EVERY ERA<br>HAS AN <span class="red">END.</span></h2>
+   <p class="lead">An era is a chapter in time that leaves its mark. This is ours: the days, the jokes, the pressure, the friendships, and the memories we will carry long after the final bell.</p>
+  </div>
+  <div class="warning-card">
+   <div class="label">SYSTEM MESSAGE // 2027</div>
+   <strong>THIS IS NOT THE END OF US.</strong>
+   <p>It's the end of one chapter. The beginning of everything we haven't become yet.</p>
+   <div class="coordinates"><span>STATUS: UNFORGETTABLE</span><span>CLASS: 2027</span></div>
+  </div>
+ </div>
+</section>
+<div class="divider"></div>
+<section id="chapters">
+ <div class="reveal">
+  <div class="section-top">02 // SELECT YOUR CHAPTER</div>
+  <h2>THE LAST <span class="red">LEVELS.</span></h2>
+  <p class="lead">Every day is another page. Every memory becomes part of the story.</p>
+ </div>
+ <div class="cards">
+  <article class="card reveal"><span class="card-num">CHAPTER_01</span><span class="arrow">↗</span><h3>The Beginning</h3><p>We walked in as classmates. We became a batch with a story of its own.</p></article>
+  <article class="card reveal"><span class="card-num">CHAPTER_02</span><span class="arrow">↗</span><h3>The Chaos</h3><p>The laughs, the last-minute study, the legendary moments nobody else would understand.</p></article>
+  <article class="card reveal"><span class="card-num">CHAPTER_03</span><span class="arrow">↗</span><h3>The Final Run</h3><p>One goal ahead. One team beside us. Let's make this chapter count.</p></article>
+ </div>
+</section>
+<div class="divider"></div>
+<section id="countdown">
+ <div class="reveal">
+  <div class="section-top">03 // TIME DOESN'T WAIT</div>
+  <h2>THE CLOCK IS <span class="red">RUNNING.</span></h2>
+  <p class="lead">The countdown is a reminder, not a reason to panic. Keep showing up, keep learning, and make the time matter.</p>
+ </div>
+ <div class="countdown-wrap reveal">
+  <div class="countdown-label">TIME UNTIL 14 MARCH 2027</div>
+  <div class="countdown" id="countdownTimer">
+   <div class="timebox"><strong id="days">---</strong><span>DAYS</span></div>
+   <div class="timebox"><strong id="hours">--</strong><span>HOURS</span></div>
+   <div class="timebox"><strong id="minutes">--</strong><span>MINUTES</span></div>
+   <div class="timebox"><strong id="seconds">--</strong><span>SECONDS</span></div>
+  </div>
+  <p class="note">COUNTING DOWN TO A NEW YEAR OF POSSIBILITIES.</p>
+ </div>
+</section>
+<div class="divider"></div>
+<section id="legacy">
+ <div class="message reveal">
+  <div class="quote-mark">“</div>
+  <div class="section-top" style="justify-content:center">04 // THE PROMISE</div>
+  <h2>WE MAY <span class="red">MOVE ON.</span><br>WE WON'T FORGET.</h2>
+  <p>One day, these classrooms will be memories. The familiar voices will become stories. But somewhere in every one of us, <span class="highlight">SSC Batch 2027 will always be a part of the story.</span></p>
+ </div>
+</section>
+<section class="final-section" id="final">
+ <div class="reveal">
+  <div class="final-label">END OF CHAPTER // NOT END OF LEGACY</div>
+  <div class="final-title">THE END<span>ERA.</span></div>
+  <p class="final-copy">Our time here won't last forever. What we make of it—and what we mean to each other—can.</p>
+  <div class="final-stamp">SSC BATCH 2027 · FOREVER REMEMBERED</div>
+ </div>
+</section>
+</main>
+<footer>
+ <div>THIS ERA WILL END. THE MEMORIES WON'T.</div>
+ <div class="aam" aria-label="Created by AAM">AAM</div>
+ <div class="footline">DESIGNED WITH FIRE // CREATED BY AAM</div>
+ <div class="smallprint">A STATIC SINGLE-FILE EXPERIENCE · SSC BATCH 2027</div>
+</footer>
+</div>
+<script>
+(() => {
+ const menuBtn=document.getElementById('menuBtn'), nav=document.getElementById('navlinks');
+ menuBtn.addEventListener('click',()=>{const open=nav.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open));menuBtn.textContent=open?'CLOSE ✕':'MENU ☰'});
+ nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');menuBtn.textContent='MENU ☰'}));
+ const progress=document.getElementById('progress');
+ const updateProgress=()=>{const max=document.documentElement.scrollHeight-innerHeight;progress.style.width=(max>0?(scrollY/max)*100:0)+'%'};
+ addEventListener('scroll',updateProgress,{passive:true});updateProgress();
+ const revealObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObserver.unobserve(e.target)}}),{threshold:.12});
+ document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+ const storm=document.getElementById('storm');
+ function flash(){if(Math.random()>.55){storm.classList.remove('flash');void storm.offsetWidth;storm.classList.add('flash')}}setInterval(flash,2400);
+ // The date is easy to change here if your official SSC exam date is announced.
+ const target=new Date('2027-03-14T00:00:00+06:00');
+ function tick(){let diff=Math.max(0,target-new Date());const d=Math.floor(diff/86400000);diff%=86400000;const h=Math.floor(diff/3600000);diff%=3600000;const m=Math.floor(diff/60000);const s=Math.floor(diff/1000)%60;
+ document.getElementById('days').textContent=String(d).padStart(3,'0');document.getElementById('hours').textContent=String(h).padStart(2,'0');document.getElementById('minutes').textContent=String(m).padStart(2,'0');document.getElementById('seconds').textContent=String(s).padStart(2,'0')}
+ tick();setInterval(tick,1000);
+ // Lightweight animated red embers; no image or GIF file required.
+ const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');let w,h,dpr,embers=[];
+ function resize(){dpr=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);embers=Array.from({length:Math.min(75,Math.floor(w/14))},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.6+.3,v:Math.random()*.55+.12,a:Math.random()*.5+.1}))}
+ function draw(){ctx.clearRect(0,0,w,h);for(const p of embers){p.y-=p.v;if(p.y< -5){p.y=h+5;p.x=Math.random()*w}ctx.beginPath();ctx.fillStyle=`rgba(255,23,56,${p.a})`;ctx.shadowColor='#ff1738';ctx.shadowBlur=8;ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}requestAnimationFrame(draw)}
+ addEventListener('resize',resize);resize();draw();
+})();
+</script>
+</body>
+</html>
